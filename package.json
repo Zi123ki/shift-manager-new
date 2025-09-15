@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "npm run dev --workspace=@shift-manager/web",
     "dev:api": "npm run dev --workspace=@shift-manager/api",
-    "build": "npm run build --workspace=@shift-manager/web",
+    "build": "cd apps/web && npm install && npm run build",
+    "build:workspace": "npm run build --workspace=@shift-manager/web",
     "build:api": "npm run build --workspace=@shift-manager/api",
     "test": "npm run test --workspaces --if-present",
     "db:generate": "npm run generate --workspace=@shift-manager/db",
