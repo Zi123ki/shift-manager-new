@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -7,7 +6,6 @@ import { useThemeStore, ColorPalette, ShiftColorPalette } from '../stores/themeS
 import { Settings, Palette, Building2 } from 'lucide-react';
 
 export default function ThemeSettings() {
-  const { t } = useTranslation();
   const {
     currentTheme,
     availableColorPalettes,

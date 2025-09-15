@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Users, Clock, MapPin } from 'lucide-react';
@@ -24,7 +23,6 @@ interface Shift {
 }
 
 export default function ShiftCalendarPage() {
-  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
 

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
 import { Button } from '../components/ui/button';
-import { Moon, Sun, User, Menu } from 'lucide-react';
+import { User, Menu } from 'lucide-react';
 import LanguageSwitch from './LanguageSwitch';
 
 interface HeaderProps {
@@ -12,7 +12,7 @@ interface HeaderProps {
 export default function Header({ onToggleSidebar }: HeaderProps) {
   const { t } = useTranslation();
   const { user } = useAuthStore();
-  const { theme, toggleTheme } = useThemeStore();
+  const { currentTheme } = useThemeStore();
 
   return (
     <header className="bg-card border-b border-border px-4 md:px-6 py-4">
@@ -52,20 +52,22 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
             <LanguageSwitch />
           </div>
 
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="flex-shrink-0"
-            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            {theme === 'light' ? (
-              <Moon className="h-4 w-4 md:h-5 md:w-5" />
-            ) : (
-              <Sun className="h-4 w-4 md:h-5 md:w-5" />
-            )}
-          </Button>
+          {/* Company Theme Indicator */}
+          {currentTheme && (
+            <div
+              style={{
+                padding: '0.5rem',
+                borderRadius: '8px',
+                backgroundColor: currentTheme.colorPalette.primary,
+                color: 'white',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}
+              title={`נושא: ${currentTheme.colorPalette.name}`}
+            >
+              {currentTheme.companyName}
+            </div>
+          )}
 
           {/* User Profile */}
           <div className="flex items-center space-x-2 md:space-x-3 rtl:space-x-reverse">
