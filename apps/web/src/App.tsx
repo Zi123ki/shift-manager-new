@@ -8,11 +8,13 @@ import { useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CalendarPage from './pages/CalendarPage';
+import ShiftCalendarPage from './pages/ShiftCalendarPage';
 import ShiftsPage from './pages/ShiftsPage';
 import EmployeesPage from './pages/EmployeesPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import AbsencesPage from './pages/AbsencesPage';
 import SettingsPage from './pages/SettingsPage';
+import ThemeSettings from './components/ThemeSettings';
 
 // Layout
 import Layout from './components/Layout';
@@ -43,13 +45,12 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
 function App() {
   const { i18n } = useTranslation();
   const { user, loading, checkAuth } = useAuthStore();
-  const { theme, initializeTheme } = useThemeStore();
+  const { currentTheme } = useThemeStore();
 
   useEffect(() => {
-    // Initialize auth and theme on app start
+    // Initialize auth on app start
     checkAuth();
-    initializeTheme();
-  }, [checkAuth, initializeTheme]);
+  }, [checkAuth]);
 
   useEffect(() => {
     // Update HTML attributes based on language
@@ -59,10 +60,11 @@ function App() {
   }, [i18n.language]);
 
   useEffect(() => {
-    // Apply theme
-    const html = document.documentElement;
-    html.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    // Apply current theme if available
+    if (currentTheme) {
+      // Theme will be applied by the theme store
+    }
+  }, [currentTheme]);
 
   if (loading) {
     return (
@@ -92,11 +94,13 @@ function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="calendar" element={<CalendarPage />} />
+          <Route path="shift-calendar" element={<ShiftCalendarPage />} />
           <Route path="shifts" element={<ShiftsPage />} />
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="absences" element={<AbsencesPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="theme-settings" element={<ThemeSettings />} />
         </Route>
 
         {/* 404 route */}

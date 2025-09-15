@@ -4,11 +4,13 @@ import { useAuthStore } from '../stores/authStore';
 import {
   LayoutDashboard,
   Calendar,
+  CalendarDays,
   Clock,
   Users,
   Building2,
   UserMinus,
   Settings,
+  Palette,
   LogOut,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -19,6 +21,11 @@ const navigationItems = [
     path: '/',
     icon: LayoutDashboard,
     exact: true,
+  },
+  {
+    name: 'לוח משמרות',
+    path: '/shift-calendar',
+    icon: CalendarDays,
   },
   {
     name: 'navigation.calendar',
@@ -44,6 +51,11 @@ const navigationItems = [
     name: 'navigation.absences',
     path: '/absences',
     icon: UserMinus,
+  },
+  {
+    name: 'הגדרות עיצוב',
+    path: '/theme-settings',
+    icon: Palette,
   },
   {
     name: 'navigation.settings',
@@ -124,7 +136,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               }`}
             >
               <Icon className="h-5 w-5 flex-shrink-0" />
-              <span className="truncate">{t(item.name)}</span>
+              <span className="truncate">{item.name.startsWith('navigation.') ? t(item.name) : item.name}</span>
             </NavLink>
           );
         })}

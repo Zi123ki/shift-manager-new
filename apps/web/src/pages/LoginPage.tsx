@@ -124,37 +124,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Demo credentials */}
-            <div style={{
-              marginTop: '1.5rem',
-              padding: '1rem',
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: '8px',
-              textAlign: 'center'
-            }}>
-              <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#16a34a' }}>
-                🎯 מצב הדגמה פעיל
-              </p>
-              <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#15803d' }}>
-                פרטי התחברות למטרות הדגמה:
-              </p>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '1rem',
-                fontSize: '14px',
-                fontFamily: 'monospace'
-              }}>
-                <span style={{ backgroundColor: '#dcfce7', padding: '4px 8px', borderRadius: '4px' }}>
-                  zvika
-                </span>
-                <span>|</span>
-                <span style={{ backgroundColor: '#dcfce7', padding: '4px 8px', borderRadius: '4px' }}>
-                  Zz321321
-                </span>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
