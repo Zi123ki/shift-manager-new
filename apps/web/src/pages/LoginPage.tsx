@@ -29,99 +29,130 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo and branding */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f8fafc',
+      padding: '1rem'
+    }}>
+      <div style={{ width: '100%', maxWidth: '400px' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '16px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '1rem'
+          }}>
+            <span style={{ color: 'white', fontSize: '24px' }}>🕒</span>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              מערכת ניהול משמרות
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">מערכת מקצועית לניהול עובדים ומשמרות</p>
-          </div>
+          <h1 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            margin: '0 0 8px 0',
+            color: '#1e293b'
+          }}>
+            מערכת ניהול משמרות
+          </h1>
+          <p style={{ color: '#64748b', margin: 0 }}>
+            מערכת מקצועית לניהול עובדים ומשמרות
+          </p>
         </div>
 
-        <div className="flex justify-center">
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <LanguageSwitch />
         </div>
 
-        <Card className="w-full shadow-lg">
-          <CardHeader className="space-y-2 pb-6">
-            <CardTitle className="text-xl md:text-2xl font-bold text-center">
+        <Card>
+          <CardHeader>
+            <CardTitle style={{ textAlign: 'center' }}>
               {t('auth.loginTitle')}
             </CardTitle>
-            <p className="text-sm text-muted-foreground text-center">
+            <p style={{ textAlign: 'center', color: '#64748b' }}>
               {t('auth.loginSubtitle')}
             </p>
           </CardHeader>
-          <CardContent className="px-4 md:px-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium block">
+          <CardContent>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                   {t('auth.usernameOrEmail')}
                 </label>
                 <Input
-                  id="username"
                   type="text"
                   value={formData.username}
                   onChange={handleChange('username')}
                   placeholder={t('auth.usernameOrEmail')}
                   required
                   autoComplete="username"
-                  className="h-12 text-base"
+                  style={{ height: '48px' }}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium block">
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                   {t('auth.password')}
                 </label>
                 <Input
-                  id="password"
                   type="password"
                   value={formData.password}
                   onChange={handleChange('password')}
                   placeholder={t('auth.password')}
                   required
                   autoComplete="current-password"
-                  className="h-12 text-base"
+                  style={{ height: '48px' }}
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium mt-6"
                 disabled={loading || !formData.username || !formData.password}
+                style={{
+                  height: '48px',
+                  marginTop: '1rem',
+                  backgroundColor: loading ? '#94a3b8' : '#3b82f6',
+                  cursor: loading ? 'not-allowed' : 'pointer'
+                }}
               >
                 {loading ? t('common.loading') : t('auth.loginButton')}
               </Button>
             </form>
 
-            {/* Demo credentials hint */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="text-center space-y-2">
-                <p className="text-sm font-semibold text-green-700 dark:text-green-300">
-                  🎯 מצב הדגמה פעיל
-                </p>
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  האפליקציה פועלת במצב הדגמה ללא צורך בשרת API
-                </p>
-                <div className="pt-2 border-t border-green-200 dark:border-green-700">
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    <span className="font-semibold">פרטי התחברות:</span>
-                  </p>
-                  <div className="flex justify-center items-center gap-4 mt-1">
-                    <code className="font-mono bg-green-100 dark:bg-green-800 px-2 py-1 rounded text-xs">zvika</code>
-                    <span className="text-green-600">|</span>
-                    <code className="font-mono bg-green-100 dark:bg-green-800 px-2 py-1 rounded text-xs">Zz321321</code>
-                  </div>
-                </div>
+            {/* Demo credentials */}
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#16a34a' }}>
+                🎯 מצב הדגמה פעיל
+              </p>
+              <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#15803d' }}>
+                פרטי התחברות למטרות הדגמה:
+              </p>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1rem',
+                fontSize: '14px',
+                fontFamily: 'monospace'
+              }}>
+                <span style={{ backgroundColor: '#dcfce7', padding: '4px 8px', borderRadius: '4px' }}>
+                  zvika
+                </span>
+                <span>|</span>
+                <span style={{ backgroundColor: '#dcfce7', padding: '4px 8px', borderRadius: '4px' }}>
+                  Zz321321
+                </span>
               </div>
             </div>
           </CardContent>

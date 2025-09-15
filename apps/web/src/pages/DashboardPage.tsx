@@ -50,38 +50,49 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div style={{ padding: '1.5rem', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       {/* Welcome Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '0.5rem' }}>
           שלום! ברוכים הבאים למערכת ניהול המשמרות
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p style={{ color: '#64748b' }}>
           כאן תוכלו לנהל את כל המשמרות, העובדים והחופשות של החברה
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-3 md:space-y-0">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">
+            <Card key={index} style={{ transition: 'box-shadow 0.2s' }}>
+              <CardContent style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '0.5rem' }}>
                       {stat.title}
                     </p>
-                    <p className="text-xl md:text-2xl font-bold text-foreground">
+                    <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '0.25rem' }}>
                       {stat.value}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                    <p style={{ fontSize: '12px', color: '#64748b' }}>
                       {stat.subtitle}
                     </p>
                   </div>
-                  <div className={`p-2 md:p-3 rounded-full flex-shrink-0 self-end md:self-auto ${stat.bgColor}`}>
-                    <Icon className={`h-4 w-4 md:h-6 md:w-6 text-white`} />
+                  <div style={{
+                    padding: '1rem',
+                    borderRadius: '50%',
+                    backgroundColor: stat.color === 'text-blue-600' ? '#3b82f6' :
+                                    stat.color === 'text-emerald-600' ? '#10b981' :
+                                    stat.color === 'text-purple-600' ? '#8b5cf6' : '#f59e0b'
+                  }}>
+                    <Icon style={{ width: '24px', height: '24px', color: 'white' }} />
                   </div>
                 </div>
               </CardContent>
