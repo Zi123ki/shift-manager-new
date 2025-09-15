@@ -74,49 +74,18 @@ export default function ShiftCalendarPage() {
   const weekDays = getWeekDays();
 
   return (
-    <div style={{
-      padding: '1.5rem',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      minHeight: '100vh'
-    }}>
+    <div className="p-6 bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen">
       {/* Header */}
-      <div style={{
-        marginBottom: '2rem',
-        padding: '1.5rem',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '16px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '1rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-          }}>
-            <Calendar style={{ width: '24px', height: '24px', color: 'white' }} />
+      <div className="mb-8 p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex justify-between items-center flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Calendar className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              color: '#1e293b',
-              margin: 0
-            }}>
+            <h1 className="text-3xl font-bold text-slate-800 mb-1">
               לוח משמרות
             </h1>
-            <p style={{ color: '#64748b', margin: 0 }}>
+            <p className="text-slate-600 m-0">
               ניהול וצפייה במשמרות העובדים
             </p>
           </div>

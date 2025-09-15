@@ -50,151 +50,57 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div style={{
-      padding: '1.5rem',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      minHeight: '100vh'
-    }}>
+    <div className="p-6 bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen">
       {/* Welcome Header */}
-      <div style={{
-        marginBottom: '2rem',
-        padding: '2rem',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '16px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 16px rgba(59, 130, 246, 0.3)'
-          }}>
-            <Building2 style={{ width: '32px', height: '32px', color: 'white' }} />
+      <div className="mb-8 p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <Building2 className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 style={{
-              fontSize: '2.25rem',
-              fontWeight: 'bold',
-              background: 'linear-gradient(135deg, #1e293b, #3b82f6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '0.25rem'
-            }}>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-600 bg-clip-text text-transparent mb-1">
               דשבורד ניהול משמרות
             </h1>
-            <p style={{ color: '#64748b', fontSize: '1.1rem' }}>
+            <p className="text-slate-600 text-lg">
               מרכז הבקרה המרכזי לניהול עובדים, משמרות וחופשות
             </p>
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1.5rem',
-          padding: '1rem',
-          backgroundColor: '#f1f5f9',
-          borderRadius: '12px',
-          marginTop: '1rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp style={{ width: '20px', height: '20px', color: '#10b981' }} />
-            <span style={{ color: '#10b981', fontWeight: '600' }}>+12% פעילות השבוע</span>
+        <div className="flex items-center gap-6 p-4 bg-slate-50 rounded-xl mt-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-green-600" />
+            <span className="text-green-600 font-semibold">+12% פעילות השבוע</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
-            <span style={{ color: '#f59e0b', fontWeight: '600' }}>5 בקשות ממתינות</span>
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-600" />
+            <span className="text-amber-600 font-semibold">5 בקשות ממתינות</span>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
-          const iconColor = stat.color === 'text-blue-600' ? '#3b82f6' :
-                           stat.color === 'text-emerald-600' ? '#10b981' :
-                           stat.color === 'text-purple-600' ? '#8b5cf6' : '#f59e0b';
           return (
-            <Card key={index} style={{
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              position: 'relative',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = `0 20px 40px rgba(0, 0, 0, 0.15), 0 0 20px ${iconColor}30`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-            }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '4px',
-                background: `linear-gradient(90deg, ${iconColor}, ${iconColor}cc)`
-              }} />
-              <CardContent style={{ padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#64748b',
-                      marginBottom: '0.75rem',
-                      fontWeight: '500',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
-                    }}>
+            <Card key={index} className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
+              <div className={`h-1 ${stat.bgColor}`} />
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-600 mb-3 font-medium uppercase tracking-wide">
                       {stat.title}
                     </p>
-                    <p style={{
-                      fontSize: '2.5rem',
-                      fontWeight: 'bold',
-                      color: '#1e293b',
-                      marginBottom: '0.5rem',
-                      lineHeight: '1'
-                    }}>
+                    <p className="text-3xl font-bold text-slate-800 mb-2 leading-none">
                       {stat.value}
                     </p>
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#64748b',
-                      fontWeight: '500'
-                    }}>
+                    <p className="text-sm text-slate-600 font-medium">
                       {stat.subtitle}
                     </p>
                   </div>
-                  <div style={{
-                    padding: '1.25rem',
-                    borderRadius: '20px',
-                    background: `linear-gradient(135deg, ${iconColor}, ${iconColor}dd)`,
-                    boxShadow: `0 8px 20px ${iconColor}40`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Icon style={{ width: '28px', height: '28px', color: 'white' }} />
+                  <div className={`p-4 rounded-2xl ${stat.lightBg} ${stat.borderColor} border-2`}>
+                    <Icon className={`w-7 h-7 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -204,176 +110,95 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-        <Card style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '16px',
-          overflow: 'hidden'
-        }}>
-          <CardHeader style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', color: 'white', padding: '1.5rem' }}>
-            <CardTitle style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <Calendar style={{ width: '24px', height: '24px' }} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
+            <CardTitle className="flex items-center gap-2 m-0">
+              <Calendar className="w-6 h-6" />
               משמרות השבוע הקרוב
             </CardTitle>
           </CardHeader>
-          <CardContent style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-                borderRadius: '12px',
-                border: '1px solid #bfdbfe'
-              }}>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>משמרת בוקר</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>08:00 - 16:00</p>
+                  <p className="font-semibold text-slate-800 mb-1">משמרת בוקר</p>
+                  <p className="text-sm text-slate-600">08:00 - 16:00</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: '600', color: '#3b82f6' }}>ראשון</p>
-                  <p style={{ fontSize: '12px', color: '#64748b' }}>3 עובדים</p>
+                <div className="text-right">
+                  <p className="font-semibold text-blue-600">ראשון</p>
+                  <p className="text-xs text-slate-600">3 עובדים</p>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
-                borderRadius: '12px',
-                border: '1px solid #bbf7d0'
-              }}>
+              <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>משמרת ערב</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>16:00 - 00:00</p>
+                  <p className="font-semibold text-slate-800 mb-1">משמרת ערב</p>
+                  <p className="text-sm text-slate-600">16:00 - 00:00</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: '600', color: '#10b981' }}>ראשון</p>
-                  <p style={{ fontSize: '12px', color: '#64748b' }}>2 עובדים</p>
+                <div className="text-right">
+                  <p className="font-semibold text-green-600">ראשון</p>
+                  <p className="text-xs text-slate-600">2 עובדים</p>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #fef3e2, #fed7aa)',
-                borderRadius: '12px',
-                border: '1px solid #fdba74'
-              }}>
+              <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>משמרת בוקר</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>08:00 - 16:00</p>
+                  <p className="font-semibold text-slate-800 mb-1">משמרת בוקר</p>
+                  <p className="text-sm text-slate-600">08:00 - 16:00</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: '600', color: '#f59e0b' }}>שני</p>
-                  <p style={{ fontSize: '12px', color: '#64748b' }}>4 עובדים</p>
+                <div className="text-right">
+                  <p className="font-semibold text-orange-600">שני</p>
+                  <p className="text-xs text-slate-600">4 עובדים</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '16px',
-          overflow: 'hidden'
-        }}>
-          <CardHeader style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', padding: '1.5rem' }}>
-            <CardTitle style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <UserMinus style={{ width: '24px', height: '24px' }} />
+        <Card className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6">
+            <CardTitle className="flex items-center gap-2 m-0">
+              <UserMinus className="w-6 h-6" />
               בקשות חופשה ממתינות
             </CardTitle>
           </CardHeader>
-          <CardContent style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                borderRadius: '12px',
-                border: '1px solid #fde68a'
-              }}>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-xl border border-yellow-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>דני כהן</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>חופשה שנתית</p>
+                  <p className="font-semibold text-slate-800 mb-1">דני כהן</p>
+                  <p className="text-sm text-slate-600">חופשה שנתית</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '0.25rem' }}>15-20 דצמבר</p>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    backgroundColor: '#fbbf24',
-                    color: 'white',
-                    fontWeight: '600'
-                  }}>
+                <div className="text-right">
+                  <p className="text-sm text-slate-600 mb-1">15-20 דצמבר</p>
+                  <span className="px-3 py-1 rounded-full text-xs bg-yellow-200 text-yellow-800 font-semibold">
                     ממתין
                   </span>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                borderRadius: '12px',
-                border: '1px solid #fde68a'
-              }}>
+              <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-xl border border-yellow-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>שרה לוי</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>דיווח מחלה</p>
+                  <p className="font-semibold text-slate-800 mb-1">שרה לוי</p>
+                  <p className="text-sm text-slate-600">דיווח מחלה</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '0.25rem' }}>22 דצמבר</p>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    backgroundColor: '#fbbf24',
-                    color: 'white',
-                    fontWeight: '600'
-                  }}>
+                <div className="text-right">
+                  <p className="text-sm text-slate-600 mb-1">22 דצמבר</p>
+                  <span className="px-3 py-1 rounded-full text-xs bg-yellow-200 text-yellow-800 font-semibold">
                     ממתין
                   </span>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, #fef2f2, #fecaca)',
-                borderRadius: '12px',
-                border: '1px solid #fca5a5'
-              }}>
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-200">
                 <div>
-                  <p style={{ fontWeight: '600', color: '#1e293b', marginBottom: '0.25rem' }}>מיכאל אברהם</p>
-                  <p style={{ fontSize: '14px', color: '#64748b' }}>חופשה חירום</p>
+                  <p className="font-semibold text-slate-800 mb-1">מיכאל אברהם</p>
+                  <p className="text-sm text-slate-600">חופשה חירום</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '0.25rem' }}>25-26 דצמבר</p>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    backgroundColor: '#ef4444',
-                    color: 'white',
-                    fontWeight: '600'
-                  }}>
+                <div className="text-right">
+                  <p className="text-sm text-slate-600 mb-1">25-26 דצמבר</p>
+                  <span className="px-3 py-1 rounded-full text-xs bg-red-200 text-red-800 font-semibold">
                     דחוף
                   </span>
                 </div>
