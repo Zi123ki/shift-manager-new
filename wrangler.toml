@@ -1,0 +1,25 @@
+name = "shift-manager-api"
+compatibility_date = "2024-01-01"
+main = "apps/api/src/index.ts"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "shift_manager_db"
+database_id = ""  # Will be filled when creating the database
+
+# Environment variables for session management
+[vars]
+NODE_ENV = "development"
+
+# Production environment variables (set via wrangler secret)
+# SESSION_SECRET - for signing cookies
+# BCRYPT_ROUNDS - for password hashing (default: 10)
+
+# Pages Functions configuration
+[pages_build_output_dir]
+directory = "apps/web/dist"
+
+# Custom build command for Pages
+[build]
+command = "npm install && npm run build"
