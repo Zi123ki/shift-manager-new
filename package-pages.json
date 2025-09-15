@@ -1,0 +1,12 @@
+{
+  "name": "shift-manager",
+  "version": "1.0.0",
+  "description": "A comprehensive shift management application",
+  "scripts": {
+    "build": "npm install && cd apps/web && npm install && npm run build",
+    "postinstall": "cd apps/web && npm install && cd ../api && npm install && cd ../../packages/ui && npm install && cd ../db && npm install"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

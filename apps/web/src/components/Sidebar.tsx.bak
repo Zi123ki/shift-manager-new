@@ -11,7 +11,7 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Button } from '@shift-manager/ui';
 
 const navigationItems = [
   {

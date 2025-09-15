@@ -1,6 +1,5 @@
 name = "shift-manager"
 compatibility_date = "2024-01-01"
-pages_build_output_dir = "apps/web/dist"
 
 # D1 Database binding
 [[d1_databases]]
@@ -10,8 +9,11 @@ database_id = "1a40b018-c64a-4307-9bc8-237c34472ef1"
 
 # Environment variables for session management
 [vars]
-NODE_ENV = "production"
+NODE_ENV = "development"
 
 # Production environment variables (set via wrangler secret)
 # SESSION_SECRET - for signing cookies
 # BCRYPT_ROUNDS - for password hashing (default: 10)
+
+# Pages Functions configuration
+pages_build_output_dir = "apps/web/dist"

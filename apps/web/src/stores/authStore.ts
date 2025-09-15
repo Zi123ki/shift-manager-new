@@ -33,7 +33,7 @@ axios.defaults.baseURL = '/api';
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       company: null,
       loading: true,

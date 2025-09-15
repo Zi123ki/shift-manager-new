@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@shift-manager/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { UserMinus } from 'lucide-react';
 
 export default function AbsencesPage() {
