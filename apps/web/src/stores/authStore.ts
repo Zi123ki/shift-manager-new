@@ -84,19 +84,19 @@ export const useAuthStore = create<AuthState>()(
             },
             {
               username: 'admin',
-              password: 'Admin456',
+              password: 'password',
               user: {
                 id: '3',
                 username: 'admin',
-                email: 'admin@retailpro.com',
+                email: 'admin@shiftmanager.com',
                 role: 'ADMIN' as const,
               },
               company: {
-                id: 'retailpro',
-                name: 'RetailPro Chain',
-                slug: 'retailpro',
+                id: 'shiftmanager',
+                name: 'מערכת ניהול משמרות',
+                slug: 'shiftmanager',
                 theme: {
-                  primary: '#f59e0b',
+                  primary: '#3b82f6',
                   secondary: '#6b7280',
                 },
               },

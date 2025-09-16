@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from './stores/authStore';
 import { useThemeStore } from './stores/themeStore';
+import { useDataStore } from './stores/dataStore';
 import { useEffect } from 'react';
 
 // Pages
@@ -46,11 +47,19 @@ function App() {
   const { i18n } = useTranslation();
   const { user, loading, checkAuth } = useAuthStore();
   const { currentTheme } = useThemeStore();
+  const { employees, departments, initializeData } = useDataStore();
 
   useEffect(() => {
     // Initialize auth on app start
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    // Initialize data if empty
+    if (employees.length === 0 && departments.length === 0) {
+      initializeData();
+    }
+  }, [employees.length, departments.length, initializeData]);
 
   useEffect(() => {
     // Update HTML attributes based on language
