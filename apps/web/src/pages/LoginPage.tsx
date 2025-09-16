@@ -79,6 +79,7 @@ export default function LoginPage() {
             </p>
           </CardHeader>
           <CardContent>
+
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>

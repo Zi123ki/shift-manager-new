@@ -42,30 +42,76 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true });
 
-          // Mock authentication for demo purposes
-          if (username === 'zvika' && password === 'Zz321321') {
+          // Mock authentication for demo purposes - Multi-tenant support
+          const mockUsers = [
+            {
+              username: 'zvika',
+              password: 'Zz321321',
+              user: {
+                id: '1',
+                username: 'zvika',
+                email: 'zvika@techcorp.com',
+                role: 'ADMIN' as const,
+              },
+              company: {
+                id: 'techcorp',
+                name: 'TechCorp Industries',
+                slug: 'techcorp',
+                theme: {
+                  primary: '#3b82f6',
+                  secondary: '#64748b',
+                },
+              },
+            },
+            {
+              username: 'manager',
+              password: 'Manager123',
+              user: {
+                id: '2',
+                username: 'manager',
+                email: 'manager@healthplus.com',
+                role: 'MANAGER' as const,
+              },
+              company: {
+                id: 'healthplus',
+                name: 'HealthPlus Medical Center',
+                slug: 'healthplus',
+                theme: {
+                  primary: '#10b981',
+                  secondary: '#6b7280',
+                },
+              },
+            },
+            {
+              username: 'admin',
+              password: 'Admin456',
+              user: {
+                id: '3',
+                username: 'admin',
+                email: 'admin@retailpro.com',
+                role: 'ADMIN' as const,
+              },
+              company: {
+                id: 'retailpro',
+                name: 'RetailPro Chain',
+                slug: 'retailpro',
+                theme: {
+                  primary: '#f59e0b',
+                  secondary: '#6b7280',
+                },
+              },
+            },
+          ];
+
+          // Find matching user
+          const matchedUser = mockUsers.find(u => u.username === username && u.password === password);
+
+          if (matchedUser) {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            const mockUser: User = {
-              id: '1',
-              username: 'zvika',
-              email: 'admin@example.com',
-              role: 'ADMIN',
-            };
-
-            const mockCompany: Company = {
-              id: '1',
-              name: 'Default Company',
-              slug: 'default-company',
-              theme: {
-                primary: '#3b82f6',
-                secondary: '#64748b',
-              },
-            };
-
-            set({ user: mockUser, company: mockCompany, loading: false });
-            toast.success('התחברת בהצלחה! 🎉');
+            set({ user: matchedUser.user, company: matchedUser.company, loading: false });
+            toast.success(`ברוך הבא ${matchedUser.company.name}! 🎉`);
             return true;
           }
 
