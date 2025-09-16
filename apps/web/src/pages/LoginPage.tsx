@@ -8,7 +8,7 @@ import LanguageSwitch from '../components/LanguageSwitch';
 import { Eye, EyeOff, Lock, User, Shield, Building2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const { t } = useTranslation();
+  const {} = useTranslation();
   const { login, loading } = useAuthStore();
   const [formData, setFormData] = useState({
     username: '',

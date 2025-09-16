@@ -14,18 +14,14 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   Building2,
-  DollarSign,
-  Clock,
-  UserCheck,
   AlertTriangle,
   Save,
   X
 } from 'lucide-react';
 
 export default function EmployeesPage() {
-  const { t } = useTranslation();
+  const {} = useTranslation();
   const {
     employees,
     departments,
@@ -110,7 +106,7 @@ export default function EmployeesPage() {
       salary: employee.salary,
       address: employee.address,
       startDate: employee.startDate,
-      status: employee.status,
+      status: 'active' as const,
       skills: employee.skills.join(', '),
       emergencyContactName: employee.emergencyContact.name,
       emergencyContactPhone: employee.emergencyContact.phone,

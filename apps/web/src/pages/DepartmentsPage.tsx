@@ -8,7 +8,7 @@ import { useDataStore } from '../stores/dataStore';
 import Modal, { ModalFooter } from '../components/ui/modal';
 
 export default function DepartmentsPage() {
-  const { t } = useTranslation();
+  const {} = useTranslation();
   const { departments, employees, addDepartment, updateDepartment, deleteDepartment } = useDataStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,7 +96,7 @@ export default function DepartmentsPage() {
         setShowEditModal(false);
         setEditingDepartment(null);
       } else {
-        addDepartment(departmentData);
+        addDepartment({...departmentData, managerId: '', costCenter: 'DEFAULT'});
         alert('מחלקה חדשה נוספה בהצלחה!');
         setShowAddModal(false);
       }

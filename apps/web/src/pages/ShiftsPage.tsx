@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Clock, Plus, Search, Edit, Trash2, Calendar, Users, MapPin, AlertTriangle } from 'lucide-react';
+import { Clock, Plus, Search, Edit, Trash2, Users, MapPin, AlertTriangle } from 'lucide-react';
 import { useDataStore } from '../stores/dataStore';
 import Modal, { ModalFooter } from '../components/ui/modal';
 
 export default function ShiftsPage() {
-  const { t } = useTranslation();
+  const {} = useTranslation();
   const { shifts, employees, departments, addShift, updateShift, deleteShift } = useDataStore();
 
   console.log('ShiftsPage data:', { shifts: shifts.length, employees: employees.length, departments: departments.length });
@@ -35,7 +35,7 @@ export default function ShiftsPage() {
   const filteredShifts = shifts.filter(shift =>
     shift.name.includes(searchTerm) ||
     shift.department.includes(searchTerm) ||
-    shift.location.includes(searchTerm) ||
+    (shift.location || '').includes(searchTerm) ||
     shift.type.includes(searchTerm)
   );
 
@@ -101,7 +101,7 @@ export default function ShiftsPage() {
         setShowEditModal(false);
         setEditingShift(null);
       } else {
-        addShift(shiftData);
+        addShift({...shiftData, departmentId: '', status: 'published', date: new Date().toISOString().split('T')[0], isRecurring: false, breaks: []});
         alert('משמרת חדשה נוספה בהצלחה!');
         setShowAddModal(false);
       }

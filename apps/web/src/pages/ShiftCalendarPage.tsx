@@ -1,49 +1,27 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Calendar, Plus, Users, Clock, MapPin } from 'lucide-react';
-
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  avatar?: string;
-  department: string;
-}
-
-interface Shift {
-  id: string;
-  employeeId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  type: 'morning' | 'evening' | 'night';
-  location?: string;
-  color: string;
-}
+import { Calendar, Plus, Clock, MapPin, Users } from 'lucide-react';
+import { useDataStore } from '../stores/dataStore';
+import Modal, { ModalFooter } from '../components/ui/modal';
+import { Input } from '../components/ui/input';
 
 export default function ShiftCalendarPage() {
+  const { shifts, employees, addShift, updateShift } = useDataStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-
-  // Mock data
-  const employees: Employee[] = [
-    { id: '1', name: 'דני כהן', position: 'מנהל משמרת', department: 'ייצור' },
-    { id: '2', name: 'שרה לוי', position: 'טכנאית', department: 'אחזקה' },
-    { id: '3', name: 'מיכאל אברהם', position: 'עובד ייצור', department: 'ייצור' },
-    { id: '4', name: 'רחל כהן', position: 'מפקחת איכות', department: 'בקרת איכות' },
-    { id: '5', name: 'יוסי שמיר', position: 'עובד מחסן', department: 'לוגיסטיקה' },
-    { id: '6', name: 'נטלי ברק', position: 'מתאמת', department: 'תפעול' },
-  ];
-
-  const shifts: Shift[] = [
-    { id: '1', employeeId: '1', date: '2024-12-15', startTime: '08:00', endTime: '16:00', type: 'morning', location: 'אזור A', color: '#3b82f6' },
-    { id: '2', employeeId: '2', date: '2024-12-15', startTime: '16:00', endTime: '00:00', type: 'evening', location: 'אזור B', color: '#10b981' },
-    { id: '3', employeeId: '3', date: '2024-12-16', startTime: '08:00', endTime: '16:00', type: 'morning', location: 'אזור A', color: '#3b82f6' },
-    { id: '4', employeeId: '4', date: '2024-12-16', startTime: '00:00', endTime: '08:00', type: 'night', location: 'אזור C', color: '#8b5cf6' },
-    { id: '5', employeeId: '5', date: '2024-12-17', startTime: '16:00', endTime: '00:00', type: 'evening', location: 'מחסן', color: '#10b981' },
-    { id: '6', employeeId: '6', date: '2024-12-17', startTime: '08:00', endTime: '16:00', type: 'morning', location: 'משרד', color: '#f59e0b' },
-  ];
+  const [showModal, setShowModal] = useState(false);
+  const [editingShift, setEditingShift] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    startTime: '',
+    endTime: '',
+    type: 'morning' as 'morning' | 'evening' | 'night',
+    department: '',
+    location: '',
+    requiredEmployees: 1,
+    assignedEmployees: [] as string[],
+    color: '#3b82f6',
+    description: ''
+  });
 
   const getWeekDays = () => {
     const startOfWeek = new Date(selectedDate);
@@ -58,26 +36,61 @@ export default function ShiftCalendarPage() {
     return days;
   };
 
-  const getMonthDays = () => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - startDate.getDay());
-
-    const days = [];
-    for (let i = 0; i < 42; i++) {
-      const day = new Date(startDate);
-      day.setDate(startDate.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
   const getShiftsForEmployeeAndDate = (employeeId: string, date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return shifts.filter(shift => shift.employeeId === employeeId && shift.date === dateStr);
+    return shifts.filter(shift =>
+      shift.assignedEmployees.includes(employeeId) &&
+      shift.date === dateStr
+    );
+  };
+
+  const openAddModal = (employeeId?: string) => {
+    setEditingShift(null);
+    setFormData({
+      name: '',
+      startTime: '',
+      endTime: '',
+      type: 'morning',
+      department: '',
+      location: '',
+      requiredEmployees: 1,
+      assignedEmployees: employeeId ? [employeeId] : [],
+      color: '#3b82f6',
+      description: ''
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name.trim() || !formData.startTime || !formData.endTime) {
+      alert('אנא מלא את כל השדות הנדרשים');
+      return;
+    }
+
+    const shiftData = {
+      ...formData,
+      date: selectedDate.toISOString().split('T')[0],
+      departmentId: '',
+      status: 'published' as const,
+      isRecurring: false,
+      breaks: []
+    };
+
+    try {
+      if (editingShift) {
+        updateShift(editingShift.id, shiftData);
+        alert('המשמרת עודכנה בהצלחה!');
+      } else {
+        addShift(shiftData);
+        alert('משמרת חדשה נוספה בהצלחה!');
+      }
+      setShowModal(false);
+      setEditingShift(null);
+    } catch (error) {
+      alert('שגיאה בשמירת המשמרת');
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -89,79 +102,91 @@ export default function ShiftCalendarPage() {
   };
 
   const weekDays = getWeekDays();
-  const monthDays = getMonthDays();
-  const currentDays = viewMode === 'week' ? weekDays : monthDays;
 
   return (
-    <div className="p-6 bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen">
+    <div style={{
+      padding: '1.5rem',
+      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
       {/* Header */}
-      <div className="mb-8 p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex justify-between items-center flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Calendar className="w-6 h-6 text-white" />
+      <div style={{
+        marginBottom: '2rem',
+        padding: '1.5rem',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '16px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+          }}>
+            <Calendar style={{ width: '24px', height: '24px', color: 'white' }} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-1">
+            <h1 style={{
+              fontSize: '1.875rem',
+              fontWeight: '700',
+              color: '#1e293b',
+              margin: '0 0 4px 0'
+            }}>
               לוח משמרות
             </h1>
-            <p className="text-slate-600 m-0">
+            <p style={{ color: '#64748b', margin: 0, fontSize: '1rem' }}>
               ניהול וצפייה במשמרות העובדים
             </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
-            <Button
-              onClick={() => setViewMode('week')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: viewMode === 'week' ? '#3b82f6' : 'transparent',
-                color: viewMode === 'week' ? 'white' : '#64748b',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              שבועי
-            </Button>
-            <Button
-              onClick={() => setViewMode('month')}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: viewMode === 'month' ? '#3b82f6' : 'transparent',
-                color: viewMode === 'month' ? 'white' : '#64748b',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              חודשי
-            </Button>
-          </div>
+          <Button
+            onClick={() => openAddModal()}
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '0.75rem 1.5rem',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '14px',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <Plus style={{ width: '16px', height: '16px' }} />
+            הוסף משמרת
+          </Button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Button
               onClick={() => {
                 const newDate = new Date(selectedDate);
-                newDate.setDate(selectedDate.getDate() - (viewMode === 'week' ? 7 : 30));
+                newDate.setDate(selectedDate.getDate() - 7);
                 setSelectedDate(newDate);
               }}
               style={{
                 padding: '0.75rem',
-                backgroundColor: '#f8fafc',
+                background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
                 color: '#3b82f6',
-                width: '40px',
-                height: '40px'
+                fontWeight: '600'
               }}
             >
               ◀
@@ -169,7 +194,7 @@ export default function ShiftCalendarPage() {
 
             <div style={{
               padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
+              background: '#3b82f6',
               color: 'white',
               borderRadius: '8px',
               fontWeight: '600',
@@ -181,374 +206,299 @@ export default function ShiftCalendarPage() {
             <Button
               onClick={() => {
                 const newDate = new Date(selectedDate);
-                newDate.setDate(selectedDate.getDate() + (viewMode === 'week' ? 7 : 30));
+                newDate.setDate(selectedDate.getDate() + 7);
                 setSelectedDate(newDate);
               }}
               style={{
                 padding: '0.75rem',
-                backgroundColor: '#f8fafc',
+                background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
                 color: '#3b82f6',
-                width: '40px',
-                height: '40px'
+                fontWeight: '600'
               }}
             >
               ▶
             </Button>
           </div>
-
-          <Button style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontWeight: '600'
-          }}>
-            <Plus style={{ width: '16px', height: '16px' }} />
-            הוסף משמרת
-          </Button>
         </div>
       </div>
 
       {/* Calendar Grid */}
-      <div style={{ width: '100%' }}>
-        {/* Calendar View */}
-        <div style={{ width: '100%' }}>
-          <Card style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '16px',
-            overflow: 'hidden'
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '16px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden'
+      }}>
+        {/* Week Header */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '200px repeat(7, 1fr)',
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+          borderBottom: '1px solid #e2e8f0'
+        }}>
+          <div style={{
+            padding: '1rem',
+            fontWeight: '700',
+            color: '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}>
-            {viewMode === 'week' ? (
-              // Weekly View
-              <>
-                {/* Calendar Header */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: `150px repeat(${currentDays.length}, 1fr)`,
-                  backgroundColor: '#f8fafc',
-                  borderBottom: '2px solid #e2e8f0'
-                }}>
-                  <div style={{
-                    padding: '1rem',
-                    fontWeight: '600',
-                    color: '#64748b',
-                    borderLeft: '1px solid #e2e8f0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    עובד
-                  </div>
-                  {currentDays.map((day, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: '1rem 0.5rem',
-                        textAlign: 'center',
-                        borderLeft: index !== currentDays.length - 1 ? '1px solid #e2e8f0' : 'none',
-                        backgroundColor: day.toDateString() === new Date().toDateString() ? '#eff6ff' : 'transparent'
-                      }}
-                    >
-                      <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px' }}>
-                        {formatDate(day)}
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                        {day.getDate()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Calendar Body */}
-                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                  {employees.map((employee, empIndex) => (
-                    <div
-                      key={employee.id}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: `150px repeat(${currentDays.length}, 1fr)`,
-                        borderBottom: empIndex !== employees.length - 1 ? '1px solid #f1f5f9' : 'none',
-                        minHeight: '80px'
-                      }}
-                    >
-                      {/* Employee Name Cell */}
-                      <div style={{
-                        padding: '1rem 0.75rem',
-                        borderLeft: '1px solid #e2e8f0',
-                        backgroundColor: '#fafbfc',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          width: '100%'
-                        }}>
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            backgroundColor: '#3b82f6',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: '600',
-                            fontSize: '12px'
-                          }}>
-                            {employee.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{
-                              fontWeight: '600',
-                              color: '#1e293b',
-                              margin: 0,
-                              fontSize: '12px',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {employee.name}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Day Cells */}
-                      {currentDays.map((day, dayIndex) => {
-                        const employeeShifts = getShiftsForEmployeeAndDate(employee.id, day);
-                        const isToday = day.toDateString() === new Date().toDateString();
-
-                        return (
-                          <div
-                            key={dayIndex}
-                            style={{
-                              padding: '0.5rem',
-                              borderLeft: dayIndex !== currentDays.length - 1 ? '1px solid #f1f5f9' : 'none',
-                              backgroundColor: isToday ? '#eff6ff' : 'transparent',
-                              minHeight: '80px',
-                              position: 'relative'
-                            }}
-                          >
-                            {employeeShifts.map((shift, shiftIndex) => (
-                              <div
-                                key={shift.id}
-                                style={{
-                                  padding: '0.4rem',
-                                  backgroundColor: shift.color,
-                                  color: 'white',
-                                  borderRadius: '6px',
-                                  marginBottom: shiftIndex !== employeeShifts.length - 1 ? '0.25rem' : 0,
-                                  fontSize: '10px',
-                                  fontWeight: '600',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s',
-                                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1.02)';
-                                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1)';
-                                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                                }}
-                              >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.2rem' }}>
-                                  <Clock style={{ width: '8px', height: '8px' }} />
-                                  <span>{shift.startTime}-{shift.endTime}</span>
-                                </div>
-                                {shift.location && (
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                    <MapPin style={{ width: '8px', height: '8px' }} />
-                                    <span>{shift.location}</span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-
-                            {/* Add Shift Button */}
-                            <Button
-                              style={{
-                                position: 'absolute',
-                                bottom: '4px',
-                                right: '4px',
-                                width: '20px',
-                                height: '20px',
-                                padding: 0,
-                                backgroundColor: '#10b981',
-                                border: 'none',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '12px',
-                                color: 'white',
-                                opacity: 0.7,
-                                transition: 'opacity 0.2s'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.opacity = '1';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.opacity = '0.7';
-                              }}
-                            >
-                              +
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              // Monthly View
-              <>
-                {/* Month Header */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  backgroundColor: '#f8fafc',
-                  borderBottom: '2px solid #e2e8f0'
-                }}>
-                  {['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'].map((dayName, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: '1rem',
-                        textAlign: 'center',
-                        fontWeight: '600',
-                        color: '#64748b',
-                        borderLeft: index !== 6 ? '1px solid #e2e8f0' : 'none'
-                      }}
-                    >
-                      {dayName}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Month Grid */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  gap: '1px',
-                  backgroundColor: '#e2e8f0'
-                }}>
-                  {currentDays.map((day, dayIndex) => {
-                    const isToday = day.toDateString() === new Date().toDateString();
-                    const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
-                    const dayShifts = shifts.filter(shift => shift.date === day.toISOString().split('T')[0]);
-
-                    return (
-                      <div
-                        key={dayIndex}
-                        style={{
-                          backgroundColor: 'white',
-                          minHeight: '120px',
-                          padding: '0.5rem',
-                          position: 'relative',
-                          opacity: isCurrentMonth ? 1 : 0.3,
-                          border: isToday ? '2px solid #3b82f6' : 'none'
-                        }}
-                      >
-                        <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: isToday ? '#3b82f6' : '#1e293b',
-                          marginBottom: '0.5rem'
-                        }}>
-                          {day.getDate()}
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          {dayShifts.slice(0, 3).map((shift) => {
-                            const employee = employees.find(e => e.id === shift.employeeId);
-                            return (
-                              <div
-                                key={shift.id}
-                                style={{
-                                  padding: '2px 4px',
-                                  backgroundColor: shift.color,
-                                  color: 'white',
-                                  borderRadius: '3px',
-                                  fontSize: '9px',
-                                  fontWeight: '600',
-                                  cursor: 'pointer',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
-                                }}
-                                title={`${employee?.name} - ${shift.startTime}-${shift.endTime}`}
-                              >
-                                {employee?.name.split(' ')[0]} {shift.startTime}
-                              </div>
-                            );
-                          })}
-                          {dayShifts.length > 3 && (
-                            <div style={{
-                              fontSize: '8px',
-                              color: '#64748b',
-                              fontWeight: '500'
-                            }}>
-                              +{dayShifts.length - 3} עוד
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Add Shift Button */}
-                        <Button
-                          style={{
-                            position: 'absolute',
-                            bottom: '4px',
-                            right: '4px',
-                            width: '18px',
-                            height: '18px',
-                            padding: 0,
-                            backgroundColor: '#10b981',
-                            border: 'none',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '10px',
-                            color: 'white',
-                            opacity: 0.7,
-                            transition: 'opacity 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.opacity = '1';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.opacity = '0.7';
-                          }}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </Card>
+            <Users style={{ width: '16px', height: '16px' }} />
+            עובדים
+          </div>
+          {weekDays.map((day, index) => (
+            <div key={index} style={{
+              padding: '1rem',
+              textAlign: 'center',
+              fontWeight: '600',
+              color: '#374151',
+              borderRight: '1px solid #e2e8f0'
+            }}>
+              <div style={{ fontSize: '0.875rem', marginBottom: '4px' }}>
+                {formatDate(day)}
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: '700' }}>
+                {day.getDate()}
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Employee Rows */}
+        {employees.map((employee, employeeIndex) => (
+          <div key={employee.id} style={{
+            display: 'grid',
+            gridTemplateColumns: '200px repeat(7, 1fr)',
+            borderBottom: employeeIndex < employees.length - 1 ? '1px solid #f1f5f9' : 'none',
+            minHeight: '80px'
+          }}>
+            {/* Employee Info */}
+            <div style={{
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              background: '#fafbfc',
+              borderRight: '1px solid #e2e8f0'
+            }}>
+              <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px' }}>
+                {employee.name}
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                {employee.position}
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b' }}>
+                {employee.department}
+              </div>
+            </div>
+
+            {/* Days */}
+            {weekDays.map((day, dayIndex) => {
+              const dayShifts = getShiftsForEmployeeAndDate(employee.id, day);
+              return (
+                <div key={dayIndex} style={{
+                  padding: '0.5rem',
+                  borderRight: dayIndex < 6 ? '1px solid #f1f5f9' : 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  minHeight: '80px',
+                  position: 'relative'
+                }}>
+                  {dayShifts.map((shift) => (
+                    <div key={shift.id} style={{
+                      background: shift.color,
+                      color: 'white',
+                      padding: '0.5rem',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      position: 'relative',
+                      cursor: 'pointer'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '2px' }}>
+                        <Clock style={{ width: '12px', height: '12px' }} />
+                        {shift.startTime} - {shift.endTime}
+                      </div>
+                      <div style={{ fontSize: '11px', opacity: 0.9 }}>
+                        {shift.name}
+                      </div>
+                      {shift.location && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '11px', opacity: 0.9, marginTop: '2px' }}>
+                          <MapPin style={{ width: '10px', height: '10px' }} />
+                          {shift.location}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add Shift Button */}
+                  <Button
+                    onClick={() => openAddModal(employee.id)}
+                    style={{
+                      width: '100%',
+                      height: dayShifts.length === 0 ? '60px' : '24px',
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      border: '2px dashed #3b82f6',
+                      borderRadius: '6px',
+                      color: '#3b82f6',
+                      fontSize: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.25rem',
+                      opacity: 0.7,
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+                  >
+                    <Plus style={{ width: '14px', height: '14px' }} />
+                    {dayShifts.length === 0 ? 'הוסף משמרת' : '+'}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
+
+      {/* Add/Edit Shift Modal */}
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingShift ? 'עריכת משמרת' : 'הוספת משמרת חדשה'}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+              שם המשמרת *
+            </label>
+            <Input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="הכנס שם משמרת"
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                שעת התחלה *
+              </label>
+              <Input
+                type="time"
+                value={formData.startTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                שעת סיום *
+              </label>
+              <Input
+                type="time"
+                value={formData.endTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                required
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+              מיקום
+            </label>
+            <Input
+              type="text"
+              value={formData.location}
+              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              placeholder="הכנס מיקום (אופציונלי)"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+              תיאור
+            </label>
+            <Input
+              type="text"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="הכנס תיאור (אופציונלי)"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          <ModalFooter>
+            <Button
+              type="button"
+              onClick={() => setShowModal(false)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                color: '#64748b',
+                fontWeight: '600'
+              }}
+            >
+              ביטול
+            </Button>
+            <Button
+              type="submit"
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+              }}
+            >
+              {editingShift ? 'עדכן משמרת' : 'הוסף משמרת'}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
     </div>
   );
 }

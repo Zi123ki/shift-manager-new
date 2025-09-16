@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { UserMinus, Plus, Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
@@ -22,7 +22,7 @@ interface AbsenceRequest {
 }
 
 export default function AbsencesPage() {
-  const { t } = useTranslation();
+  const {} = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 

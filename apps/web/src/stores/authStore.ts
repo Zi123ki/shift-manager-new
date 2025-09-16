@@ -25,6 +25,7 @@ interface AuthState {
   logout: () => void;
   checkAuth: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  updateCompany: (company: Partial<Company>) => void;
 }
 
 // Configure axios defaults
@@ -55,7 +56,7 @@ export const useAuthStore = create<AuthState>()(
               },
               company: {
                 id: 'techcorp',
-                name: 'TechCorp Industries',
+                name: 'מערכת ניהול משמרות',
                 slug: 'techcorp',
                 theme: {
                   primary: '#3b82f6',
@@ -166,6 +167,13 @@ export const useAuthStore = create<AuthState>()(
           toast.error('שגיאה בשינוי סיסמה');
           return false;
         }
+      },
+
+      updateCompany: (companyUpdates: Partial<Company>) => {
+        set((state) => ({
+          company: state.company ? { ...state.company, ...companyUpdates } : null
+        }));
+        toast.success('פרטי החברה עודכנו בהצלחה');
       },
     }),
     {
