@@ -60,9 +60,28 @@ export interface PendingRegistration {
   rejectionReason?: string;
 }
 
+export interface SystemUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER';
+  status: 'active' | 'inactive';
+  createdAt: string;
+  lastLogin?: string;
+  createdBy: string;
+  permissions: {
+    manageCompanies: boolean;
+    manageUsers: boolean;
+    viewAnalytics: boolean;
+    managePlans: boolean;
+    approveRegistrations: boolean;
+  };
+}
+
 interface SuperAdminState {
   companies: ClientCompany[];
   pendingRegistrations: PendingRegistration[];
+  systemUsers: SystemUser[];
   loading: boolean;
 
   // Company management
@@ -76,6 +95,13 @@ interface SuperAdminState {
   addPendingRegistration: (registration: Omit<PendingRegistration, 'id' | 'submittedAt' | 'status'>) => void;
   approveRegistration: (id: string, reviewerId: string) => ClientCompany | null;
   rejectRegistration: (id: string, reviewerId: string, reason: string) => void;
+
+  // User management
+  addSystemUser: (user: Omit<SystemUser, 'id' | 'createdAt'>) => void;
+  updateSystemUser: (id: string, updates: Partial<SystemUser>) => void;
+  deleteSystemUser: (id: string) => void;
+  activateSystemUser: (id: string) => void;
+  deactivateSystemUser: (id: string) => void;
 
   // Data fetching
   initializeSuperAdminData: () => void;
@@ -92,6 +118,7 @@ export const useSuperAdminStore = create<SuperAdminState>()(
     (set, get) => ({
       companies: [],
       pendingRegistrations: [],
+      systemUsers: [],
       loading: false,
 
       addCompany: (companyData) => {
@@ -258,9 +285,52 @@ export const useSuperAdminStore = create<SuperAdminState>()(
         }));
       },
 
+      // User management functions
+      addSystemUser: (userData) => {
+        const newUser: SystemUser = {
+          ...userData,
+          id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          createdAt: new Date().toISOString(),
+        };
+
+        set((state) => ({
+          systemUsers: [...state.systemUsers, newUser]
+        }));
+      },
+
+      updateSystemUser: (id, updates) => {
+        set((state) => ({
+          systemUsers: state.systemUsers.map(user =>
+            user.id === id ? { ...user, ...updates } : user
+          )
+        }));
+      },
+
+      deleteSystemUser: (id) => {
+        set((state) => ({
+          systemUsers: state.systemUsers.filter(user => user.id !== id)
+        }));
+      },
+
+      activateSystemUser: (id) => {
+        set((state) => ({
+          systemUsers: state.systemUsers.map(user =>
+            user.id === id ? { ...user, status: 'active' } : user
+          )
+        }));
+      },
+
+      deactivateSystemUser: (id) => {
+        set((state) => ({
+          systemUsers: state.systemUsers.map(user =>
+            user.id === id ? { ...user, status: 'inactive' } : user
+          )
+        }));
+      },
+
       initializeSuperAdminData: () => {
         const state = get();
-        if (state.companies.length === 0) {
+        if (state.companies.length === 0 || state.pendingRegistrations.length === 0 || state.systemUsers.length === 0) {
           // Initialize with demo data
           const demoCompanies: ClientCompany[] = [
             {
@@ -373,9 +443,64 @@ export const useSuperAdminStore = create<SuperAdminState>()(
             }
           ];
 
+          const demoSystemUsers: SystemUser[] = [
+            {
+              id: 'user_1',
+              name: 'אדמין ראשי',
+              email: 'admin@shiftmanager.co.il',
+              role: 'SUPER_ADMIN',
+              status: 'active',
+              createdAt: '2024-01-01T00:00:00Z',
+              lastLogin: '2024-12-18T10:30:00Z',
+              createdBy: 'system',
+              permissions: {
+                manageCompanies: true,
+                manageUsers: true,
+                viewAnalytics: true,
+                managePlans: true,
+                approveRegistrations: true,
+              }
+            },
+            {
+              id: 'user_2',
+              name: 'יובל מנהל',
+              email: 'yuval@shiftmanager.co.il',
+              role: 'ADMIN',
+              status: 'active',
+              createdAt: '2024-06-15T14:20:00Z',
+              lastLogin: '2024-12-17T16:45:00Z',
+              createdBy: 'user_1',
+              permissions: {
+                manageCompanies: true,
+                manageUsers: false,
+                viewAnalytics: true,
+                managePlans: false,
+                approveRegistrations: true,
+              }
+            },
+            {
+              id: 'user_3',
+              name: 'שרה תמיכה',
+              email: 'sara@shiftmanager.co.il',
+              role: 'MANAGER',
+              status: 'active',
+              createdAt: '2024-09-10T11:00:00Z',
+              lastLogin: '2024-12-18T09:15:00Z',
+              createdBy: 'user_1',
+              permissions: {
+                manageCompanies: false,
+                manageUsers: false,
+                viewAnalytics: true,
+                managePlans: false,
+                approveRegistrations: false,
+              }
+            }
+          ];
+
           set({
             companies: demoCompanies,
             pendingRegistrations: demoPendingRegistrations,
+            systemUsers: demoSystemUsers,
           });
         }
       },

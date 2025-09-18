@@ -232,14 +232,14 @@ export default function EmployeesPage() {
       {/* Actions Bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-          <div style={{ position: 'relative', minWidth: '250px' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '300px', minWidth: '200px' }}>
             <Search style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#9ca3af' }} />
             <Input
               type="text"
               placeholder="חיפוש עובדים..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ paddingRight: '2.5rem', height: '44px' }}
+              style={{ paddingRight: '2.5rem', height: '36px' }}
             />
           </div>
 
@@ -247,7 +247,7 @@ export default function EmployeesPage() {
             value={filterDepartment}
             onChange={(e) => setFilterDepartment(e.target.value)}
             style={{
-              height: '44px',
+              height: '36px',
               padding: '0 1rem',
               borderRadius: '6px',
               border: '1px solid #d1d5db',
@@ -265,7 +265,7 @@ export default function EmployeesPage() {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
             style={{
-              height: '44px',
+              height: '36px',
               padding: '0 1rem',
               borderRadius: '6px',
               border: '1px solid #d1d5db',
@@ -281,7 +281,7 @@ export default function EmployeesPage() {
 
         <Button
           onClick={openAddModal}
-          style={{ backgroundColor: '#3b82f6', color: 'white', height: '44px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          style={{ backgroundColor: '#3b82f6', color: 'white', height: '36px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
           <Plus style={{ width: '16px', height: '16px' }} />
           הוסף עובד חדש
@@ -457,7 +457,7 @@ export default function EmployeesPage() {
                 required
                 style={{
                   width: '100%',
-                  height: '44px',
+                  height: '36px',
                   padding: '0 1rem',
                   borderRadius: '6px',
                   border: '1px solid #d1d5db',

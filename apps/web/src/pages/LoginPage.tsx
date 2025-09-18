@@ -4,23 +4,86 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { useAuthStore } from '../stores/authStore';
+import { useMfaStore } from '../stores/mfaStore';
 import LanguageSwitch from '../components/LanguageSwitch';
+import MfaVerificationModal from '../components/MfaVerificationModal';
 import { Eye, EyeOff, Lock, User, Shield, Building2 } from 'lucide-react';
 
 export default function LoginPage() {
   const {} = useTranslation();
   const { login, loading } = useAuthStore();
+  const { initiateMfa } = useMfaStore();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [mfaSession, setMfaSession] = useState(null);
+  const [showMfaModal, setShowMfaModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.username || !formData.password) return;
 
-    await login(formData.username, formData.password);
+    // First, try the normal login flow to validate credentials
+    const mockUsers = [
+      {
+        username: 'superadmin',
+        password: 'SuperAdmin123!',
+        user: {
+          id: '0',
+          username: 'superadmin',
+          email: 'admin@shift-manager-system.com',
+          role: 'SUPER_ADMIN' as const,
+        },
+        company: {
+          id: 'system',
+          name: 'Shift Manager - מערכת ניהול',
+          slug: 'system',
+          theme: { primary: '#dc2626', secondary: '#7c2d12' },
+        },
+      },
+      {
+        username: 'zvika',
+        password: 'Zz321321',
+        user: {
+          id: '1',
+          username: 'zvika',
+          email: 'zvika@techcorp.com',
+          role: 'ADMIN' as const,
+        },
+        company: {
+          id: 'techcorp',
+          name: 'מערכת ניהול משמרות',
+          slug: 'techcorp',
+          theme: { primary: '#3b82f6', secondary: '#64748b' },
+        },
+      },
+    ];
+
+    const matchedUser = mockUsers.find(u => u.username === formData.username && u.password === formData.password);
+
+    if (matchedUser) {
+      // Check if MFA is required
+      const session = await initiateMfa(formData.username, formData.password, matchedUser.user, matchedUser.company);
+
+      if (session) {
+        // MFA required - show MFA modal
+        setMfaSession(session);
+        setShowMfaModal(true);
+      } else {
+        // No MFA required - proceed with normal login
+        await login(formData.username, formData.password);
+      }
+    } else {
+      // Invalid credentials - proceed with normal login to show error
+      await login(formData.username, formData.password);
+    }
+  };
+
+  const handleCloseMfa = () => {
+    setShowMfaModal(false);
+    setMfaSession(null);
   };
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,8 +268,8 @@ export default function LoginPage() {
                     required
                     autoComplete="username"
                     style={{
-                      height: '44px',
-                      paddingRight: '3rem',
+                      height: '40px',
+                      paddingRight: '2.5rem',
                       paddingLeft: '1rem',
                       border: '2px solid #e5e7eb',
                       borderRadius: '12px',
@@ -255,9 +318,9 @@ export default function LoginPage() {
                     required
                     autoComplete="current-password"
                     style={{
-                      height: '44px',
-                      paddingRight: '3rem',
-                      paddingLeft: '3rem',
+                      height: '40px',
+                      paddingRight: '2.5rem',
+                      paddingLeft: '2.5rem',
                       border: '2px solid #e5e7eb',
                       borderRadius: '12px',
                       fontSize: '0.95rem',
@@ -300,7 +363,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={loading || !formData.username || !formData.password}
                 style={{
-                  height: '56px',
+                  height: '48px',
                   marginTop: '1rem',
                   background: loading ? 'linear-gradient(135deg, #94a3b8, #64748b)' : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                   border: 'none',
@@ -378,6 +441,13 @@ export default function LoginPage() {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+
+      {/* MFA Verification Modal */}
+      <MfaVerificationModal
+        isOpen={showMfaModal}
+        onClose={handleCloseMfa}
+        session={mfaSession}
+      />
     </div>
   );
 }

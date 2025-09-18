@@ -28,6 +28,7 @@ export default function SuperAdminDashboard() {
   const {
     companies,
     pendingRegistrations,
+    systemUsers,
     getTotalRevenue,
     getActiveCompaniesCount,
     getTrialCompaniesCount,
@@ -35,7 +36,12 @@ export default function SuperAdminDashboard() {
     approveRegistration,
     rejectRegistration,
     deleteCompany,
-    addCompany
+    addCompany,
+    addSystemUser,
+    updateSystemUser,
+    deleteSystemUser,
+    activateSystemUser,
+    deactivateSystemUser
   } = useSuperAdminStore();
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'companies' | 'registrations' | 'plans' | 'users' | 'analytics'>('dashboard');
@@ -60,6 +66,19 @@ export default function SuperAdminDashboard() {
     website: '',
     plan: 'starter',
     status: 'trial' as 'active' | 'suspended' | 'trial' | 'expired'
+  });
+
+  const [userFormData, setUserFormData] = useState({
+    name: '',
+    email: '',
+    role: 'ADMIN' as 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER',
+    permissions: {
+      manageCompanies: false,
+      manageUsers: false,
+      viewAnalytics: true,
+      managePlans: false,
+      approveRegistrations: false,
+    }
   });
 
   const [plans, setPlans] = useState([
@@ -180,6 +199,36 @@ export default function SuperAdminDashboard() {
     setRejectionReason('');
   };
 
+  const handleAddUser = () => {
+    if (!userFormData.name.trim() || !userFormData.email.trim()) {
+      alert('אנא מלא את כל השדות הנדרשים');
+      return;
+    }
+
+    const newUser = {
+      ...userFormData,
+      status: 'active' as const,
+      createdBy: user?.id || 'super_admin',
+    };
+
+    addSystemUser(newUser);
+    alert(`משתמש מערכת נוצר בהצלחה!\nשם: ${userFormData.name}\nאימייל: ${userFormData.email}\nתפקיד: ${userFormData.role}`);
+
+    // Reset form
+    setUserFormData({
+      name: '',
+      email: '',
+      role: 'ADMIN',
+      permissions: {
+        manageCompanies: false,
+        manageUsers: false,
+        viewAnalytics: true,
+        managePlans: false,
+        approveRegistrations: false,
+      }
+    });
+  };
+
   const handleAddCompany = () => {
     if (!companyFormData.name.trim() || !companyFormData.email.trim()) {
       alert('אנא מלא את השדות הנדרשים');
@@ -286,8 +335,10 @@ export default function SuperAdminDashboard() {
   );
 
   const filteredRegistrations = pendingRegistrations.filter(reg =>
-    reg.companyName.includes(searchTerm) ||
-    reg.adminEmail.includes(searchTerm)
+    reg.status === 'pending' && (
+      reg.companyName.includes(searchTerm) ||
+      reg.adminEmail.includes(searchTerm)
+    )
   );
 
   return (
@@ -536,7 +587,7 @@ export default function SuperAdminDashboard() {
         <div>
           {/* Companies Management */}
           <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: '250px' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '300px', minWidth: '200px' }}>
               <Search style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#9ca3af' }} />
               <Input
                 type="text"
@@ -545,10 +596,11 @@ export default function SuperAdminDashboard() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
                   paddingRight: '2.25rem',
-                  height: '36px',
+                  height: '40px',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  width: '100%'
                 }}
               />
             </div>
@@ -932,40 +984,214 @@ export default function SuperAdminDashboard() {
 
       {activeTab === 'users' && (
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>ניהול משתמשי מערכת</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', margin: 0 }}>ניהול משתמשי מערכת</h2>
+            <Button
+              onClick={handleAddUser}
+              style={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <Plus style={{ width: '16px', height: '16px' }} />
+              הוסף משתמש חדש
+            </Button>
+          </div>
 
-          <Card>
-            <CardContent style={{ padding: '3rem', textAlign: 'center' }}>
-              <Users style={{ width: '64px', height: '64px', color: '#9ca3af', margin: '0 auto 1rem' }} />
-              <h3 style={{ margin: '0 0 0.5rem 0', color: '#6b7280' }}>ניהול משתמשים</h3>
-              <p style={{ margin: 0, color: '#9ca3af' }}>תכונה זו תתפתח בעתיד לניהול משתמשי מנהל-על ומשתמשי מערכת</p>
-              <div style={{ marginTop: '2rem' }}>
-                <Button
-                  style={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                    color: 'white',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}
-                  onClick={() => {
-                    const name = prompt('הכנס שם מלא למשתמש המערכת:');
-                    if (!name) return;
-                    const email = prompt('הכנס אימייל למשתמש המערכת:');
-                    if (!email) return;
-                    const role = prompt('בחר תפקיד (ADMIN/MANAGER):', 'ADMIN');
-                    if (!role) return;
-
-                    alert(`משתמש מערכת נוצר בהצלחה!\nשם: ${name}\nאימייל: ${email}\nתפקיד: ${role}\n\nסיסמה זמנית נשלחה לאימייל`);
-                  }}
-                >
-                  הוסף משתמש מערכת
-                </Button>
+          {/* User Form */}
+          <Card style={{ marginBottom: '2rem' }}>
+            <CardContent style={{ padding: '1.5rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: '600' }}>הוספת משתמש מערכת</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>שם מלא *</label>
+                  <Input
+                    type="text"
+                    value={userFormData.name}
+                    onChange={(e) => setUserFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="הכנס שם מלא"
+                    style={{ width: '100%', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '6px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>אימייל *</label>
+                  <Input
+                    type="email"
+                    value={userFormData.email}
+                    onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="הכנס אימייל"
+                    style={{ width: '100%', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '6px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>תפקיד *</label>
+                  <select
+                    value={userFormData.role}
+                    onChange={(e) => setUserFormData(prev => ({ ...prev, role: e.target.value as any }))}
+                    style={{ width: '100%', padding: '0.5rem', border: '2px solid #e5e7eb', borderRadius: '6px' }}
+                  >
+                    <option value="ADMIN">מנהל</option>
+                    <option value="MANAGER">מנהל תפעול</option>
+                    <option value="SUPER_ADMIN">מנהל על</option>
+                  </select>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Users List */}
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {systemUsers.map((systemUser) => (
+              <Card key={systemUser.id} style={{
+                background: 'white',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px'
+              }}>
+                <CardContent style={{ padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                        <div style={{
+                          width: '48px',
+                          height: '48px',
+                          background: systemUser.role === 'SUPER_ADMIN' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
+                                      systemUser.role === 'ADMIN' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' :
+                                      'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '18px'
+                        }}>
+                          {systemUser.name.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>{systemUser.name}</h3>
+                          <p style={{ margin: '2px 0 0 0', color: '#64748b', fontSize: '14px' }}>{systemUser.email}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '4px' }}>
+                            <span style={{
+                              padding: '0.2rem 0.6rem',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              background: systemUser.role === 'SUPER_ADMIN' ? '#fee2e2' :
+                                          systemUser.role === 'ADMIN' ? '#ede9fe' : '#d1fae5',
+                              color: systemUser.role === 'SUPER_ADMIN' ? '#dc2626' :
+                                     systemUser.role === 'ADMIN' ? '#8b5cf6' : '#059669'
+                            }}>
+                              {systemUser.role === 'SUPER_ADMIN' ? 'מנהל על' :
+                               systemUser.role === 'ADMIN' ? 'מנהל' : 'מנהל תפעול'}
+                            </span>
+                            <span style={{
+                              padding: '0.2rem 0.6rem',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              background: systemUser.status === 'active' ? '#d1fae5' : '#fee2e2',
+                              color: systemUser.status === 'active' ? '#059669' : '#dc2626'
+                            }}>
+                              {systemUser.status === 'active' ? 'פעיל' : 'לא פעיל'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                        <div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>נוצר בתאריך</div>
+                          <div style={{ fontWeight: '500' }}>{new Date(systemUser.createdAt).toLocaleDateString('he-IL')}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>כניסה אחרונה</div>
+                          <div style={{ fontWeight: '500' }}>
+                            {systemUser.lastLogin ? new Date(systemUser.lastLogin).toLocaleDateString('he-IL') : 'אף פעם'}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>נוצר על ידי</div>
+                          <div style={{ fontWeight: '500' }}>
+                            {systemUsers.find(u => u.id === systemUser.createdBy)?.name || 'מערכת'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {systemUser.status === 'active' ? (
+                        <Button
+                          onClick={() => deactivateSystemUser(systemUser.id)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#fee2e2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          השבת
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => activateSystemUser(systemUser.id)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#d1fae5',
+                            color: '#059669',
+                            border: '1px solid #a7f3d0',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          הפעל
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() => {
+                          if (confirm(`האם אתה בטוח שברצונך למחוק את המשתמש ${systemUser.name}?`)) {
+                            deleteSystemUser(systemUser.id);
+                          }
+                        }}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#f1f5f9',
+                          color: '#64748b',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600'
+                        }}
+                      >
+                        מחק
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {systemUsers.length === 0 && (
+              <Card>
+                <CardContent style={{ padding: '3rem', textAlign: 'center' }}>
+                  <Users style={{ width: '64px', height: '64px', color: '#9ca3af', margin: '0 auto 1rem' }} />
+                  <h3 style={{ margin: '0 0 0.5rem 0', color: '#6b7280' }}>אין משתמשי מערכת</h3>
+                  <p style={{ margin: 0, color: '#9ca3af' }}>הוסף משתמש ראשון למערכת</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
 

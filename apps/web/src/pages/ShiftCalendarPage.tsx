@@ -6,9 +6,11 @@ import Modal, { ModalFooter } from '../components/ui/modal';
 import { Input } from '../components/ui/input';
 
 export default function ShiftCalendarPage() {
-  const { shifts, employees, addShift, updateShift } = useDataStore();
+  const { shifts, employees, departments, addShift, updateShift } = useDataStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
+  const [showPredefinedModal, setShowPredefinedModal] = useState(false);
+  const [selectedEmployeeForShift, setSelectedEmployeeForShift] = useState<string | null>(null);
   const [editingShift, setEditingShift] = useState<any>(null);
   const [draggedShift, setDraggedShift] = useState<any>(null);
   const [dropZone, setDropZone] = useState<{employeeId: string, date: Date} | null>(null);
@@ -46,6 +48,89 @@ export default function ShiftCalendarPage() {
     );
   };
 
+  const predefinedShifts = [
+    {
+      id: 'template-1',
+      name: 'משמרת בוקר - ייצור',
+      startTime: '08:00',
+      endTime: '16:00',
+      type: 'morning' as const,
+      department: 'ייצור',
+      location: 'אולם ייצור A',
+      color: '#3b82f6',
+      description: 'משמרת ייצור בוקר עם דגש על יעדי תפוקה',
+      breaks: [
+        { start: '10:00', end: '10:15', duration: 15 },
+        { start: '12:00', end: '12:30', duration: 30 },
+        { start: '14:00', end: '14:15', duration: 15 }
+      ]
+    },
+    {
+      id: 'template-2',
+      name: 'משמרת ערב - אחזקה',
+      startTime: '16:00',
+      endTime: '00:00',
+      type: 'evening' as const,
+      department: 'אחזקה',
+      location: 'אולם מכונות',
+      color: '#10b981',
+      description: 'משמרת אחזקה ותחזוקה מתוכננת',
+      breaks: [
+        { start: '18:00', end: '18:30', duration: 30 },
+        { start: '21:00', end: '21:15', duration: 15 }
+      ]
+    },
+    {
+      id: 'template-3',
+      name: 'משמרת לילה - אבטחה',
+      startTime: '00:00',
+      endTime: '08:00',
+      type: 'night' as const,
+      department: 'אבטחה',
+      location: 'כל האתר',
+      color: '#6366f1',
+      description: 'משמרת לילה לאבטחה ובטיחות',
+      breaks: [
+        { start: '03:00', end: '03:30', duration: 30 }
+      ]
+    },
+    {
+      id: 'template-4',
+      name: 'משמרת איכות - בוקר',
+      startTime: '09:00',
+      endTime: '17:00',
+      type: 'morning' as const,
+      department: 'בקרת איכות',
+      location: 'מעבדת איכות',
+      color: '#f59e0b',
+      description: 'משמרת בקרת איכות ובדיקות מעבדה',
+      breaks: [
+        { start: '11:00', end: '11:15', duration: 15 },
+        { start: '13:00', end: '13:30', duration: 30 }
+      ]
+    },
+    {
+      id: 'template-5',
+      name: 'משמרת לוגיסטיקה',
+      startTime: '08:30',
+      endTime: '16:30',
+      type: 'morning' as const,
+      department: 'לוגיסטיקה',
+      location: 'מחסן ראשי',
+      color: '#8b5cf6',
+      description: 'משמרת ניהול מלאים ולוגיסטיקה',
+      breaks: [
+        { start: '10:30', end: '10:45', duration: 15 },
+        { start: '12:30', end: '13:00', duration: 30 }
+      ]
+    }
+  ];
+
+  const openPredefinedModal = (employeeId?: string) => {
+    setSelectedEmployeeForShift(employeeId || null);
+    setShowPredefinedModal(true);
+  };
+
   const openAddModal = (employeeId?: string) => {
     setEditingShift(null);
     setFormData({
@@ -61,6 +146,35 @@ export default function ShiftCalendarPage() {
       description: ''
     });
     setShowModal(true);
+  };
+
+  const selectPredefinedShift = (template: any) => {
+    const shiftData = {
+      name: template.name,
+      startTime: template.startTime,
+      endTime: template.endTime,
+      type: template.type,
+      department: template.department,
+      departmentId: departments.find(d => d.name === template.department)?.id || '',
+      location: template.location,
+      requiredEmployees: 1,
+      assignedEmployees: selectedEmployeeForShift ? [selectedEmployeeForShift] : [],
+      color: template.color,
+      description: template.description,
+      date: selectedDate.toISOString().split('T')[0],
+      status: 'published' as const,
+      isRecurring: false,
+      breaks: template.breaks || []
+    };
+
+    try {
+      addShift(shiftData);
+      alert('משמרת נוספה בהצלחה!');
+      setShowPredefinedModal(false);
+      setSelectedEmployeeForShift(null);
+    } catch (error) {
+      alert('שגיאה בהוספת המשמרת');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -202,7 +316,7 @@ export default function ShiftCalendarPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Button
-            onClick={() => openAddModal()}
+            onClick={() => openPredefinedModal()}
             style={{
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               border: 'none',
@@ -434,7 +548,7 @@ export default function ShiftCalendarPage() {
 
                   {/* Add Shift Button */}
                   <Button
-                    onClick={() => openAddModal(employee.id)}
+                    onClick={() => openPredefinedModal(employee.id)}
                     style={{
                       width: '100%',
                       height: dayShifts.length === 0 ? '60px' : '24px',
@@ -492,6 +606,121 @@ export default function ShiftCalendarPage() {
           </div>
         </div>
       )}
+
+      {/* Predefined Shifts Modal */}
+      <Modal isOpen={showPredefinedModal} onClose={() => setShowPredefinedModal(false)} title="בחר משמרת מוגדרת מראש">
+        <div style={{ display: 'grid', gap: '1rem', maxHeight: '400px', overflowY: 'auto' }}>
+          {predefinedShifts.map((template) => (
+            <div
+              key={template.id}
+              onClick={() => selectPredefinedShift(template)}
+              style={{
+                background: 'var(--card-bg)',
+                border: `2px solid ${template.color}20`,
+                borderRadius: '12px',
+                padding: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.boxShadow = `0 8px 25px ${template.color}20`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: '0.75rem',
+                right: '0.75rem',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                background: template.color
+              }} />
+
+              <div style={{ marginBottom: '0.5rem' }}>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: 'var(--text-primary)',
+                  margin: '0 0 0.25rem 0'
+                }}>
+                  {template.name}
+                </h3>
+                <p style={{
+                  fontSize: '0.9rem',
+                  color: 'var(--text-secondary)',
+                  margin: 0
+                }}>
+                  {template.description}
+                </p>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.875rem',
+                color: 'var(--text-secondary)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Clock style={{ width: '14px', height: '14px' }} />
+                  {template.startTime} - {template.endTime}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <MapPin style={{ width: '14px', height: '14px' }} />
+                  {template.location}
+                </div>
+              </div>
+
+              {template.breaks && template.breaks.length > 0 && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-secondary)',
+                  opacity: 0.7
+                }}>
+                  הפסקות: {template.breaks.map(b => `${b.start}-${b.end}`).join(', ')}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <ModalFooter>
+          <Button
+            onClick={() => setShowPredefinedModal(false)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#64748b',
+              fontWeight: '600'
+            }}
+          >
+            ביטול
+          </Button>
+          <Button
+            onClick={() => openAddModal(selectedEmployeeForShift || undefined)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              fontWeight: '600',
+              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+            }}
+          >
+            צור משמרת מותאמת אישית
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       {/* Add/Edit Shift Modal */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingShift ? 'עריכת משמרת' : 'הוספת משמרת חדשה'}>

@@ -16,6 +16,8 @@ import {
   User,
 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+import { useMfaStore } from '../stores/mfaStore';
+import MfaSetupModal from '../components/MfaSetupModal';
 
 interface CompanySettings {
   name: string;
@@ -43,8 +45,13 @@ interface WorkSettings {
 export default function SettingsPage() {
   const {} = useTranslation();
   const { company, user, updateCompany } = useAuthStore();
+  const { getMethods } = useMfaStore();
   const [activeTab, setActiveTab] = useState<'company' | 'work' | 'notifications' | 'security'>('company');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showMfaModal, setShowMfaModal] = useState(false);
+
+  const userMfaMethods = user ? getMethods(user.id) : [];
+  const activeMfaMethods = userMfaMethods.filter(m => m.enabled && m.verified);
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
     name: company?.name || 'מערכת ניהול משמרות',
@@ -762,27 +769,27 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Security Features */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '1rem',
-                      background: '#f8fafc',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0'
-                    }}>
+                  {/* MFA Section */}
+                  <div style={{
+                    padding: '1rem',
+                    background: '#f0f9ff',
+                    border: '1px solid #0ea5e9',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                       <div>
-                        <div style={{ fontWeight: '500', color: '#374151' }}>אימות דו-שלבי</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                        <div style={{ fontWeight: '600', color: '#0284c7', marginBottom: '0.25rem' }}>
+                          אימות דו-שלבי (MFA)
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#374151' }}>
                           הגן על החשבון שלך עם שכבת אבטחה נוספת
                         </div>
                       </div>
                       <Button
+                        onClick={() => setShowMfaModal(true)}
                         style={{
                           padding: '0.5rem 1rem',
-                          background: '#f59e0b',
+                          background: activeMfaMethods.length > 0 ? '#10b981' : '#3b82f6',
                           border: 'none',
                           borderRadius: '6px',
                           color: 'white',
@@ -790,9 +797,23 @@ export default function SettingsPage() {
                           fontWeight: '600'
                         }}
                       >
-                        בקרוב
+                        {activeMfaMethods.length > 0 ? 'נהל' : 'הגדר'}
                       </Button>
                     </div>
+
+                    {activeMfaMethods.length > 0 ? (
+                      <div style={{ fontSize: '12px', color: '#059669' }}>
+                        ✓ פעיל - {activeMfaMethods.length} שיטות אימות מוגדרות
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#dc2626' }}>
+                        ⚠ לא מוגדר - החשבון שלך חשוף יותר לסיכונים
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Security Features */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
                     <div style={{
                       display: 'flex',
@@ -872,6 +893,12 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* MFA Setup Modal */}
+      <MfaSetupModal
+        isOpen={showMfaModal}
+        onClose={() => setShowMfaModal(false)}
+      />
     </div>
   );
 }

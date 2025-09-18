@@ -28,6 +28,7 @@ interface AuthState {
   company: Company | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
+  loginWithoutMfa: (user: User, company: Company) => void;
   logout: () => void;
   checkAuth: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
@@ -201,6 +202,12 @@ export const useAuthStore = create<AuthState>()(
           set({ loading: false });
           return false;
         }
+      },
+
+      loginWithoutMfa: (user: User, company: Company) => {
+        // Direct login without MFA verification - used after successful MFA
+        set({ user, company, loading: false });
+        toast.success(`ברוך הבא ${company.name}! 🎉`);
       },
 
       logout: async () => {
