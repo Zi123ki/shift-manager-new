@@ -12,8 +12,12 @@ import {
   Settings,
   Palette,
   LogOut,
+  Crown,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { useTheme } from '../contexts/ThemeContext';
 
 const navigationItems = [
   {
@@ -72,6 +76,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { user, company, logout } = useAuthStore();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const isActiveRoute = (path: string, exact = false) => {
     if (exact) {
@@ -112,7 +117,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
               {company?.name}
             </h1>
             <p className="text-xs text-muted-foreground truncate">
-              {user?.role} - {user?.username}
+              {user?.role === 'SUPER_ADMIN' ? 'מנהל-על' : user?.role === 'ADMIN' ? 'מנהל' : user?.role === 'MANAGER' ? 'מנהל' : 'עובד'} - {user?.username}
             </p>
           </div>
         </div>
@@ -120,7 +125,19 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navigationItems.map((item) => {
+        {(user?.role === 'SUPER_ADMIN' ? [
+          {
+            name: 'פאנל מנהל-על',
+            path: '/',
+            icon: Crown,
+            exact: true,
+          },
+          {
+            name: 'navigation.settings',
+            path: '/settings',
+            icon: Settings,
+          }
+        ] : navigationItems).map((item: any) => {
           const Icon = item.icon;
           const isActive = isActiveRoute(item.path, item.exact);
 
@@ -143,7 +160,19 @@ export default function Sidebar({ onClose }: SidebarProps) {
       </nav>
 
       {/* User Actions */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-2">
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-muted-foreground hover:text-foreground"
+          onClick={toggleDarkMode}
+        >
+          {isDarkMode ? (
+            <Sun className="h-4 w-4 ml-2 rtl:ml-0 rtl:mr-2" />
+          ) : (
+            <Moon className="h-4 w-4 ml-2 rtl:ml-0 rtl:mr-2" />
+          )}
+          {isDarkMode ? 'מצב יום' : 'מצב לילה'}
+        </Button>
         <Button
           variant="ghost"
           className="w-full justify-start text-muted-foreground hover:text-foreground"

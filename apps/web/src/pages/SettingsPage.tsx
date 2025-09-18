@@ -707,7 +707,7 @@ export default function SettingsPage() {
                     <div style={{ color: '#374151' }}>
                       <div>שם: {user?.username}</div>
                       <div>אימייל: {user?.email}</div>
-                      <div>תפקיד: {user?.role === 'ADMIN' ? 'מנהל' : user?.role === 'MANAGER' ? 'מנהל' : 'עובד'}</div>
+                      <div>תפקיד: {user?.role === 'SUPER_ADMIN' ? 'מנהל-על' : user?.role === 'ADMIN' ? 'מנהל' : user?.role === 'MANAGER' ? 'מנהל' : 'עובד'}</div>
                     </div>
                   </div>
 

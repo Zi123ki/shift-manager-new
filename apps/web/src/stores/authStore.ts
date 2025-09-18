@@ -2,12 +2,18 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import {
+  validatePassword,
+  loginRateLimiter,
+  auditLogger,
+  sanitizeInput
+} from '../utils/security';
 
 export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'ADMIN' | 'MANAGER' | 'EMPLOYEE';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'EMPLOYEE';
 }
 
 export interface Company {
@@ -43,8 +49,47 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true });
 
+          // Sanitize inputs
+          const cleanUsername = sanitizeInput(username);
+          const cleanPassword = sanitizeInput(password);
+
+          // Rate limiting check
+          const userIdentifier = cleanUsername || 'unknown';
+          if (!loginRateLimiter.isAllowed(userIdentifier)) {
+            const timeUntilReset = Math.ceil(loginRateLimiter.getTimeUntilReset(userIdentifier) / 1000 / 60);
+            auditLogger.log({
+              userId: userIdentifier,
+              action: 'LOGIN_BLOCKED',
+              resource: 'auth',
+              success: false,
+              details: { reason: 'rate_limit_exceeded' }
+            });
+            toast.error(`נחסמת זמנית בגלל ניסיונות כניסה מרובים. נסה שוב בעוד ${timeUntilReset} דקות`);
+            set({ loading: false });
+            return false;
+          }
+
           // Mock authentication for demo purposes - Multi-tenant support
           const mockUsers = [
+            {
+              username: 'superadmin',
+              password: 'SuperAdmin123!',
+              user: {
+                id: '0',
+                username: 'superadmin',
+                email: 'admin@shift-manager-system.com',
+                role: 'SUPER_ADMIN' as const,
+              },
+              company: {
+                id: 'system',
+                name: 'Shift Manager - מערכת ניהול',
+                slug: 'system',
+                theme: {
+                  primary: '#dc2626',
+                  secondary: '#7c2d12',
+                },
+              },
+            },
             {
               username: 'zvika',
               password: 'Zz321321',
@@ -105,11 +150,27 @@ export const useAuthStore = create<AuthState>()(
           ];
 
           // Find matching user
-          const matchedUser = mockUsers.find(u => u.username === username && u.password === password);
+          const matchedUser = mockUsers.find(u => u.username === cleanUsername && u.password === cleanPassword);
 
           if (matchedUser) {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Reset rate limiter on successful login
+            loginRateLimiter.reset(userIdentifier);
+
+            // Log successful login
+            auditLogger.log({
+              userId: matchedUser.user.id,
+              action: 'LOGIN',
+              resource: 'auth',
+              success: true,
+              details: {
+                username: cleanUsername,
+                role: matchedUser.user.role,
+                company: matchedUser.company.name
+              }
+            });
 
             set({ user: matchedUser.user, company: matchedUser.company, loading: false });
             toast.success(`ברוך הבא ${matchedUser.company.name}! 🎉`);
@@ -118,6 +179,19 @@ export const useAuthStore = create<AuthState>()(
 
           // If credentials don't match
           await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Log failed login attempt
+          auditLogger.log({
+            userId: userIdentifier,
+            action: 'LOGIN',
+            resource: 'auth',
+            success: false,
+            details: {
+              username: cleanUsername,
+              reason: 'invalid_credentials'
+            }
+          });
+
           toast.error('שם משתמש או סיסמה שגויים');
           set({ loading: false });
           return false;
@@ -131,6 +205,21 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
+          const currentUser = useAuthStore.getState().user;
+
+          // Log logout event
+          if (currentUser) {
+            auditLogger.log({
+              userId: currentUser.id,
+              action: 'LOGOUT',
+              resource: 'auth',
+              success: true,
+              details: {
+                username: currentUser.username
+              }
+            });
+          }
+
           // Mock logout - no API call needed
           set({ user: null, company: null, loading: false });
           toast.success('התנתקת בהצלחה');
@@ -151,14 +240,57 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      changePassword: async (currentPassword: string, _newPassword: string) => {
+      changePassword: async (currentPassword: string, newPassword: string) => {
         try {
+          const currentUser = useAuthStore.getState().user;
+          if (!currentUser) {
+            toast.error('משתמש לא מחובר');
+            return false;
+          }
+
+          // Validate new password strength
+          const passwordValidation = validatePassword(newPassword);
+          if (!passwordValidation.isValid) {
+            toast.error(`סיסמה לא תקינה: ${passwordValidation.errors.join(', ')}`);
+            return false;
+          }
+
+          if (passwordValidation.strength === 'weak') {
+            toast.error('הסיסמה חלשה מדי - אנא בחר סיסמה חזקה יותר');
+            return false;
+          }
+
           // Mock password change
           if (currentPassword === 'Zz321321') {
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Log password change
+            auditLogger.log({
+              userId: currentUser.id,
+              action: 'PASSWORD_CHANGE',
+              resource: 'auth',
+              success: true,
+              details: {
+                username: currentUser.username,
+                passwordStrength: passwordValidation.strength
+              }
+            });
+
             toast.success('הסיסמה שונתה בהצלחה');
             return true;
           }
+
+          // Log failed password change
+          auditLogger.log({
+            userId: currentUser.id,
+            action: 'PASSWORD_CHANGE',
+            resource: 'auth',
+            success: false,
+            details: {
+              username: currentUser.username,
+              reason: 'invalid_current_password'
+            }
+          });
 
           toast.error('הסיסמה הנוכחית שגויה');
           return false;

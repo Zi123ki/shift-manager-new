@@ -10,6 +10,8 @@ export default function ShiftCalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [editingShift, setEditingShift] = useState<any>(null);
+  const [draggedShift, setDraggedShift] = useState<any>(null);
+  const [dropZone, setDropZone] = useState<{employeeId: string, date: Date} | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     startTime: '',
@@ -99,6 +101,52 @@ export default function ShiftCalendarPage() {
       day: 'numeric',
       month: 'short'
     }).format(date);
+  };
+
+  // Drag & Drop functions
+  const handleDragStart = (e: React.DragEvent, shift: any) => {
+    setDraggedShift(shift);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', '');
+  };
+
+  const handleDragOver = (e: React.DragEvent, employeeId: string, date: Date) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropZone({ employeeId, date });
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropZone(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetEmployeeId: string, targetDate: Date) => {
+    e.preventDefault();
+
+    if (!draggedShift) return;
+
+    const targetDateStr = targetDate.toISOString().split('T')[0];
+
+    // Update the shift with new employee and date
+    const updatedShift = {
+      ...draggedShift,
+      assignedEmployees: [targetEmployeeId],
+      date: targetDateStr
+    };
+
+    updateShift(draggedShift.id, updatedShift);
+
+    setDraggedShift(null);
+    setDropZone(null);
+
+    // Show success message
+    alert(`המשמרת הועברה בהצלחה לעובד ${employees.find(emp => emp.id === targetEmployeeId)?.name} בתאריך ${targetDate.toLocaleDateString('he-IL')}`);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedShift(null);
+    setDropZone(null);
   };
 
   const weekDays = getWeekDays();
@@ -298,30 +346,79 @@ export default function ShiftCalendarPage() {
             {/* Days */}
             {weekDays.map((day, dayIndex) => {
               const dayShifts = getShiftsForEmployeeAndDate(employee.id, day);
+              const isDropZone = dropZone && dropZone.employeeId === employee.id &&
+                                dropZone.date.toDateString() === day.toDateString();
+
               return (
-                <div key={dayIndex} style={{
-                  padding: '0.5rem',
-                  borderRight: dayIndex < 6 ? '1px solid #f1f5f9' : 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.25rem',
-                  minHeight: '80px',
-                  position: 'relative'
-                }}>
+                <div
+                  key={dayIndex}
+                  style={{
+                    padding: '0.5rem',
+                    borderRight: dayIndex < 6 ? '1px solid #f1f5f9' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.25rem',
+                    minHeight: '80px',
+                    position: 'relative',
+                    background: isDropZone ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                    border: isDropZone ? '2px dashed #3b82f6' : 'none',
+                    transition: 'all 0.2s'
+                  }}
+                  onDragOver={(e) => handleDragOver(e, employee.id, day)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, employee.id, day)}
+                >
                   {dayShifts.map((shift) => (
-                    <div key={shift.id} style={{
-                      background: shift.color,
-                      color: 'white',
-                      padding: '0.5rem',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      position: 'relative',
-                      cursor: 'pointer'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '2px' }}>
-                        <Clock style={{ width: '12px', height: '12px' }} />
-                        {shift.startTime} - {shift.endTime}
+                    <div
+                      key={shift.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, shift)}
+                      onDragEnd={handleDragEnd}
+                      style={{
+                        background: shift.color,
+                        color: 'white',
+                        padding: '0.5rem',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        position: 'relative',
+                        cursor: 'grab',
+                        opacity: draggedShift?.id === shift.id ? 0.5 : 1,
+                        transform: draggedShift?.id === shift.id ? 'scale(0.95)' : 'scale(1)',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (draggedShift?.id !== shift.id) {
+                          e.currentTarget.style.transform = 'scale(1.02)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (draggedShift?.id !== shift.id) {
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                        }
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        marginBottom: '2px',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Clock style={{ width: '12px', height: '12px' }} />
+                          {shift.startTime} - {shift.endTime}
+                        </div>
+                        <div style={{
+                          fontSize: '10px',
+                          opacity: 0.7,
+                          cursor: 'grab'
+                        }}>
+                          ⋮⋮
+                        </div>
                       </div>
                       <div style={{ fontSize: '11px', opacity: 0.9 }}>
                         {shift.name}
@@ -365,6 +462,36 @@ export default function ShiftCalendarPage() {
           </div>
         ))}
       </div>
+
+      {/* Drag Instructions */}
+      {draggedShift && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '1rem 2rem',
+          borderRadius: '12px',
+          fontSize: '1.1rem',
+          fontWeight: '600',
+          textAlign: 'center',
+          zIndex: 1000,
+          pointerEvents: 'none',
+          animation: 'fadeIn 0.3s'
+        }}>
+          גרור את המשמרת לעובד או ליום אחר
+          <div style={{
+            fontSize: '0.9rem',
+            fontWeight: '400',
+            marginTop: '0.5rem',
+            opacity: 0.8
+          }}>
+            {draggedShift.name} • {draggedShift.startTime}-{draggedShift.endTime}
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Shift Modal */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editingShift ? 'עריכת משמרת' : 'הוספת משמרת חדשה'}>
@@ -499,6 +626,22 @@ export default function ShiftCalendarPage() {
           </ModalFooter>
         </form>
       </Modal>
+
+      <style>{`
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translate(-50%, -60%); }
+          100% { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .shift-dragging {
+          cursor: grabbing !important;
+        }
+
+        .drop-zone-active {
+          background: rgba(59, 130, 246, 0.1) !important;
+          border: 2px dashed #3b82f6 !important;
+        }
+      `}</style>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useAuthStore } from './stores/authStore';
 import { useThemeStore } from './stores/themeStore';
 import { useDataStore } from './stores/dataStore';
 import { useEffect } from 'react';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -15,6 +16,8 @@ import EmployeesPage from './pages/EmployeesPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import AbsencesPage from './pages/AbsencesPage';
 import SettingsPage from './pages/SettingsPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import CompanyRegistration from './pages/CompanyRegistration';
 import ThemeSettings from './components/ThemeSettings';
 
 // Layout
@@ -85,38 +88,46 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Routes>
-        {/* Public routes */}
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/" replace /> : <LoginPage />}
-        />
+    <ThemeProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <Routes>
+          {/* Public routes */}
+          <Route
+            path="/login"
+            element={user ? <Navigate to="/" replace /> : <LoginPage />}
+          />
+          <Route
+            path="/register"
+            element={<CompanyRegistration />}
+          />
 
-        {/* Protected routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="shift-calendar" element={<ShiftCalendarPage />} />
-          <Route path="shifts" element={<ShiftsPage />} />
-          <Route path="employees" element={<EmployeesPage />} />
-          <Route path="departments" element={<DepartmentsPage />} />
-          <Route path="absences" element={<AbsencesPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="theme-settings" element={<ThemeSettings />} />
-        </Route>
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            {/* Super Admin Route */}
+            <Route path="super-admin" element={<SuperAdminDashboard />} />
+            <Route index element={user?.role === 'SUPER_ADMIN' ? <SuperAdminDashboard /> : <DashboardPage />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="shift-calendar" element={<ShiftCalendarPage />} />
+            <Route path="shifts" element={<ShiftsPage />} />
+            <Route path="employees" element={<EmployeesPage />} />
+            <Route path="departments" element={<DepartmentsPage />} />
+            <Route path="absences" element={<AbsencesPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="theme-settings" element={<ThemeSettings />} />
+          </Route>
 
-        {/* 404 route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+          {/* 404 route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </ThemeProvider>
   );
 }
 

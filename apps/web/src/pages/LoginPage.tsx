@@ -346,32 +346,22 @@ export default function LoginPage() {
                 <p style={{
                   color: '#64748b',
                   fontSize: '0.9rem',
-                  margin: 0
+                  margin: '0 0 0.5rem 0'
                 }}>
                   שכחת סיסמה? <a href="#" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: '600' }}>לחץ כאן</a>
+                </p>
+                <p style={{
+                  color: '#64748b',
+                  fontSize: '0.9rem',
+                  margin: 0
+                }}>
+                  חברה חדשה? <a href="/register" style={{ color: '#10b981', textDecoration: 'none', fontWeight: '600' }}>הירשם כאן</a>
                 </p>
               </div>
             </form>
           </CardContent>
         </Card>
 
-        {/* Demo Info */}
-        <div style={{
-          marginTop: '2rem',
-          padding: '1rem',
-          background: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '12px',
-          textAlign: 'center',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <p style={{
-            color: 'rgba(255, 255, 255, 0.9)',
-            margin: 0,
-            fontSize: '0.9rem'
-          }}>
-            <strong>להדגמה:</strong> admin / password
-          </p>
-        </div>
       </div>
 
       <style>{`
