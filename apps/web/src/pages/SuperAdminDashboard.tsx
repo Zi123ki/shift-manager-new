@@ -4,11 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import {
   Building2,
-  TrendingUp,
   AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
   DollarSign,
   Search,
   Eye,
@@ -18,9 +14,7 @@ import {
   Plus,
   Edit,
   Trash2,
-  Settings,
   Users,
-  Globe,
   CreditCard,
   Star,
   Zap
@@ -41,23 +35,15 @@ export default function SuperAdminDashboard() {
     approveRegistration,
     rejectRegistration,
     deleteCompany,
-    suspendCompany,
-    activateCompany,
     addCompany
   } = useSuperAdminStore();
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'companies' | 'registrations' | 'plans' | 'users' | 'analytics'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState<any>(null);
-  const [showCompanyModal, setShowCompanyModal] = useState(false);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
   // New modals
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
-  const [showEditCompanyModal, setShowEditCompanyModal] = useState(false);
-  const [showPlansModal, setShowPlansModal] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
   const [editingCompany, setEditingCompany] = useState<any>(null);
   const [editingPlan, setEditingPlan] = useState<any>(null);

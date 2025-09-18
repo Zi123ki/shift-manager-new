@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, MapPin } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
 import { useDataStore } from '../stores/dataStore';
 import Modal, { ModalFooter } from '../components/ui/modal';
 import { Input } from '../components/ui/input';

@@ -398,50 +398,6 @@ export const useSuperAdminStore = create<SuperAdminState>()(
         return get().companies.filter(c => c.status === 'expired').length;
       },
 
-      addCompany: (company) => {
-        const newCompany = {
-          ...company,
-          id: company.id || `company_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          createdAt: company.createdAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          expiryDate: company.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days trial
-          employeeCount: company.employeeCount || 0,
-          activeUsers: company.activeUsers || 0,
-          totalRevenue: company.totalRevenue || 0,
-          currentEmployees: company.currentEmployees || 0,
-          maxEmployees: company.limits?.maxEmployees || 10,
-          monthlyPrice: company.plan === 'starter' ? 99 : company.plan === 'professional' ? 199 : 399,
-          adminUser: company.adminUser || {
-            id: `admin_${Date.now()}`,
-            username: company.email.split('@')[0],
-            email: company.email,
-            fullName: company.name + ' Admin',
-            phone: company.phone || '',
-          },
-          features: company.features || {
-            shifts: true,
-            employees: true,
-            departments: true,
-            reports: company.plan !== 'starter',
-            integrations: company.plan === 'enterprise',
-            customBranding: company.plan === 'enterprise',
-            apiAccess: company.plan === 'enterprise',
-            advancedSecurity: company.plan !== 'starter',
-          },
-          usage: company.usage || {
-            monthlyShifts: 0,
-            monthlyReports: 0,
-            apiCalls: 0,
-            storageUsed: 0,
-          }
-        };
-
-        set((state) => ({
-          companies: [...state.companies, newCompany]
-        }));
-
-        return newCompany;
-      },
     }),
     {
       name: 'super-admin-storage',
