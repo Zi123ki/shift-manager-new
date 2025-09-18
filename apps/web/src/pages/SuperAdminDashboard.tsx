@@ -44,7 +44,11 @@ export default function SuperAdminDashboard() {
 
   // New modals
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [showEditCompanyModal, setShowEditCompanyModal] = useState(false);
   const [showAddPlanModal, setShowAddPlanModal] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [editingCompany, setEditingCompany] = useState<any>(null);
   const [editingPlan, setEditingPlan] = useState<any>(null);
 
@@ -283,13 +287,13 @@ export default function SuperAdminDashboard() {
 
   const filteredRegistrations = pendingRegistrations.filter(reg =>
     reg.companyName.includes(searchTerm) ||
-    reg.contactEmail.includes(searchTerm)
+    reg.adminEmail.includes(searchTerm)
   );
 
   return (
     <div style={{
       padding: '1.5rem',
-      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+      background: 'var(--bg-secondary)',
       minHeight: '100vh'
     }}>
       {/* Header */}
@@ -451,22 +455,100 @@ export default function SuperAdminDashboard() {
       </div>
 
       {/* Content based on active tab */}
+      {activeTab === 'dashboard' && (
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>דשבורד כללי</h2>
+
+          {/* Dashboard widgets */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            <Card style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white' }}>
+              <CardContent style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', opacity: 0.9 }}>סה"כ הכנסות חודשיות</h3>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: '700' }}>
+                      ₪{getTotalRevenue().toLocaleString('he-IL')}
+                    </p>
+                  </div>
+                  <DollarSign style={{ width: '48px', height: '48px', opacity: 0.8 }} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white' }}>
+              <CardContent style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', opacity: 0.9 }}>חברות פעילות</h3>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: '700' }}>
+                      {getActiveCompaniesCount()}
+                    </p>
+                  </div>
+                  <Building2 style={{ width: '48px', height: '48px', opacity: 0.8 }} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white' }}>
+              <CardContent style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', opacity: 0.9 }}>תקופות ניסיון</h3>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: '700' }}>
+                      {getTrialCompaniesCount()}
+                    </p>
+                  </div>
+                  <Star style={{ width: '48px', height: '48px', opacity: 0.8 }} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card style={{ background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: 'white' }}>
+              <CardContent style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', opacity: 0.9 }}>רישומים ממתינים</h3>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '2rem', fontWeight: '700' }}>
+                      {pendingRegistrations.length}
+                    </p>
+                  </div>
+                  <AlertTriangle style={{ width: '48px', height: '48px', opacity: 0.8 }} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity */}
+          <Card style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+            <CardContent style={{ padding: '1.5rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)' }}>פעילות אחרונה</h3>
+              <div style={{ color: 'var(--text-tertiary)' }}>
+                <p style={{ margin: '0.5rem 0' }}>• חברה חדשה הצטרפה: {companies[companies.length - 1]?.name || 'אין נתונים'}</p>
+                <p style={{ margin: '0.5rem 0' }}>• {pendingRegistrations.length} רישומים ממתינים לאישור</p>
+                <p style={{ margin: '0.5rem 0' }}>• סה"כ הכנסות חודשיות: ₪{getTotalRevenue().toLocaleString('he-IL')}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {activeTab === 'companies' && (
         <div>
           {/* Companies Management */}
           <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', flex: 1, minWidth: '300px' }}>
-              <Search style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#9ca3af' }} />
+            <div style={{ position: 'relative', width: '250px' }}>
+              <Search style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#9ca3af' }} />
               <Input
                 type="text"
                 placeholder="חיפוש חברות..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
-                  paddingRight: '2.5rem',
-                  height: '44px',
-                  border: '2px solid #e2e8f0',
-                  borderRadius: '12px'
+                  paddingRight: '2.25rem',
+                  height: '36px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '14px'
                 }}
               />
             </div>
@@ -475,14 +557,15 @@ export default function SuperAdminDashboard() {
               style={{
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: 'white',
-                height: '44px',
-                padding: '0 1.5rem',
-                borderRadius: '12px',
+                height: '36px',
+                padding: '0 1rem',
+                borderRadius: '8px',
                 border: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                fontWeight: '600'
+                fontWeight: '600',
+                fontSize: '14px'
               }}
             >
               <Plus style={{ width: '16px', height: '16px' }} />
@@ -493,8 +576,8 @@ export default function SuperAdminDashboard() {
           <div style={{ display: 'grid', gap: '1rem' }}>
             {filteredCompanies.map((company) => (
               <Card key={company.id} style={{
-                background: 'white',
-                border: '1px solid #e2e8f0',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '16px'
               }}>
                 <CardContent style={{ padding: '1.5rem' }}>
@@ -516,8 +599,8 @@ export default function SuperAdminDashboard() {
                           {company.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>{company.name}</h3>
-                          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>{company.email}</p>
+                          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)' }}>{company.name}</h3>
+                          <p style={{ margin: '4px 0 0 0', color: 'var(--text-tertiary)', fontSize: '14px' }}>{company.email}</p>
                         </div>
                         <span style={{
                           padding: '0.25rem 0.75rem',
@@ -533,20 +616,20 @@ export default function SuperAdminDashboard() {
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
                         <div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>תוכנית</div>
-                          <div style={{ fontWeight: '600' }}>{company.plan}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>תוכנית</div>
+                          <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{company.plan}</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>עובדים</div>
-                          <div style={{ fontWeight: '600' }}>{company.employeeCount || 0}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>עובדים</div>
+                          <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{company.employeeCount || 0}</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>הכנסות</div>
-                          <div style={{ fontWeight: '600' }}>₪{(company.totalRevenue || 0).toLocaleString('he-IL')}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>הכנסות</div>
+                          <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>₪{(company.totalRevenue || 0).toLocaleString('he-IL')}</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>נוצר</div>
-                          <div style={{ fontWeight: '600' }}>{new Date(company.createdAt).toLocaleDateString('he-IL')}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>נוצר</div>
+                          <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{new Date(company.createdAt).toLocaleDateString('he-IL')}</div>
                         </div>
                       </div>
                     </div>
@@ -727,7 +810,153 @@ export default function SuperAdminDashboard() {
       {activeTab === 'registrations' && (
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>רישומים ממתינים לאישור</h2>
-          {/* Registration approval content */}
+
+          {filteredRegistrations.length === 0 ? (
+            <Card>
+              <CardContent style={{ padding: '3rem', textAlign: 'center' }}>
+                <AlertTriangle style={{ width: '64px', height: '64px', color: '#9ca3af', margin: '0 auto 1rem' }} />
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#6b7280' }}>אין רישומים ממתינים</h3>
+                <p style={{ margin: 0, color: '#9ca3af' }}>כל הרישומים טופלו או שאין רישומים חדשים</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {filteredRegistrations.map((registration) => (
+                <Card key={registration.id} style={{
+                  background: 'white',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '16px'
+                }}>
+                  <CardContent style={{ padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                          <div style={{
+                            width: '48px',
+                            height: '48px',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '18px'
+                          }}>
+                            {registration.companyName.charAt(0)}
+                          </div>
+                          <div>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>{registration.companyName}</h3>
+                            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>{registration.adminEmail}</p>
+                          </div>
+                          <span style={{
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '9999px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            background: '#fef3c7',
+                            color: '#92400e'
+                          }}>
+                            ממתין
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                          <div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>איש קשר</div>
+                            <div style={{ fontWeight: '600' }}>{registration.adminName}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>טלפון</div>
+                            <div style={{ fontWeight: '600' }}>{registration.adminPhone}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>תוכנית מבוקשת</div>
+                            <div style={{ fontWeight: '600' }}>{registration.requestedPlan}</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>תאריך הגשה</div>
+                            <div style={{ fontWeight: '600' }}>{new Date(registration.submittedAt).toLocaleDateString('he-IL')}</div>
+                          </div>
+                        </div>
+
+                        {registration.message && (
+                          <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '0.5rem' }}>הודעה</div>
+                            <div style={{ fontSize: '14px' }}>{registration.message}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          onClick={() => handleApproveRegistration(registration.id)}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          אשר
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setSelectedRegistration(registration);
+                            setShowRegistrationModal(true);
+                          }}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: '#ef4444',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          דחה
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>ניהול משתמשי מערכת</h2>
+
+          <Card>
+            <CardContent style={{ padding: '3rem', textAlign: 'center' }}>
+              <Users style={{ width: '64px', height: '64px', color: '#9ca3af', margin: '0 auto 1rem' }} />
+              <h3 style={{ margin: '0 0 0.5rem 0', color: '#6b7280' }}>ניהול משתמשים</h3>
+              <p style={{ margin: 0, color: '#9ca3af' }}>תכונה זו תתפתח בעתיד לניהול משתמשי מנהל-על ומשתמשי מערכת</p>
+              <div style={{ marginTop: '2rem' }}>
+                <Button
+                  style={{
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    color: 'white',
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                  onClick={() => alert('תכונה זו תתפתח בעתיד')}
+                >
+                  הוסף משתמש מערכת
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -907,6 +1136,134 @@ export default function SuperAdminDashboard() {
             </Button>
           </ModalFooter>
         </form>
+      </Modal>
+
+      {/* Edit Company Modal */}
+      <Modal isOpen={showEditCompanyModal} onClose={() => setShowEditCompanyModal(false)} title="עריכת פרטי חברה">
+        <form onSubmit={(e) => { e.preventDefault(); handleEditCompany(); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>שם החברה *</label>
+            <Input
+              type="text"
+              value={companyFormData.name}
+              onChange={(e) => setCompanyFormData(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="הכנס שם חברה"
+              required
+              style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>אימייל *</label>
+            <Input
+              type="email"
+              value={companyFormData.email}
+              onChange={(e) => setCompanyFormData(prev => ({ ...prev, email: e.target.value }))}
+              placeholder="הכנס אימייל"
+              required
+              style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>טלפון</label>
+              <Input
+                type="tel"
+                value={companyFormData.phone}
+                onChange={(e) => setCompanyFormData(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="הכנס טלפון"
+                style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>סטטוס</label>
+              <select
+                value={companyFormData.status}
+                onChange={(e) => setCompanyFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                style={{ width: '100%', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px' }}
+              >
+                <option value="active">פעיל</option>
+                <option value="trial">ניסיון</option>
+                <option value="suspended">מושעה</option>
+                <option value="expired">פג תוקף</option>
+              </select>
+            </div>
+          </div>
+
+          <ModalFooter>
+            <Button
+              type="button"
+              onClick={() => setShowEditCompanyModal(false)}
+              style={{ padding: '0.75rem 1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+            >
+              ביטול
+            </Button>
+            <Button
+              type="submit"
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              עדכן חברה
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
+
+      {/* Registration Rejection Modal */}
+      <Modal isOpen={showRegistrationModal} onClose={() => setShowRegistrationModal(false)} title="דחיית רישום">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <p>אתה עומד לדחות את הרישום של: <strong>{selectedRegistration?.companyName}</strong></p>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>סיבת הדחייה *</label>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="הכנס סיבת דחייה..."
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                minHeight: '100px',
+                resize: 'vertical'
+              }}
+            />
+          </div>
+
+          <ModalFooter>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowRegistrationModal(false);
+                setRejectionReason('');
+              }}
+              style={{ padding: '0.75rem 1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+            >
+              ביטול
+            </Button>
+            <Button
+              onClick={() => selectedRegistration && handleRejectRegistration(selectedRegistration.id)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              דחה רישום
+            </Button>
+          </ModalFooter>
+        </div>
       </Modal>
     </div>
   );
