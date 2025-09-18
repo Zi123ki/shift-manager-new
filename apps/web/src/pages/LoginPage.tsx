@@ -205,12 +205,12 @@ export default function LoginPage() {
                     required
                     autoComplete="username"
                     style={{
-                      height: '56px',
+                      height: '44px',
                       paddingRight: '3rem',
                       paddingLeft: '1rem',
                       border: '2px solid #e5e7eb',
                       borderRadius: '12px',
-                      fontSize: '1rem',
+                      fontSize: '0.95rem',
                       transition: 'all 0.2s',
                       background: '#ffffff'
                     }}
@@ -255,12 +255,12 @@ export default function LoginPage() {
                     required
                     autoComplete="current-password"
                     style={{
-                      height: '56px',
+                      height: '44px',
                       paddingRight: '3rem',
                       paddingLeft: '3rem',
                       border: '2px solid #e5e7eb',
                       borderRadius: '12px',
-                      fontSize: '1rem',
+                      fontSize: '0.95rem',
                       transition: 'all 0.2s',
                       background: '#ffffff'
                     }}

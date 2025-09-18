@@ -154,18 +154,18 @@ export default function ShiftCalendarPage() {
   return (
     <div style={{
       padding: '1.5rem',
-      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+      background: 'var(--bg-secondary)',
       minHeight: '100vh'
     }}>
       {/* Header */}
       <div style={{
         marginBottom: '2rem',
         padding: '1.5rem',
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'var(--card-bg)',
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

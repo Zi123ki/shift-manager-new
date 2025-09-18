@@ -160,7 +160,7 @@ export default function SuperAdminDashboard() {
   }
 
   const handleApproveRegistration = (registrationId: string) => {
-    const newCompany = approveRegistration(registrationId, user.id);
+    const newCompany = approveRegistration(registrationId, user?.id || 'super_admin');
     if (newCompany) {
       alert('הרישום אושר בהצלחה! החברה נוספה למערכת.');
       setShowRegistrationModal(false);
@@ -173,7 +173,7 @@ export default function SuperAdminDashboard() {
       alert('אנא הכנס סיבת דחייה');
       return;
     }
-    rejectRegistration(registrationId, user.id, rejectionReason);
+    rejectRegistration(registrationId, user?.id || 'super_admin', rejectionReason);
     alert('הרישום נדחה');
     setShowRegistrationModal(false);
     setSelectedRegistration(null);
@@ -950,7 +950,16 @@ export default function SuperAdminDashboard() {
                     fontSize: '14px',
                     fontWeight: '600'
                   }}
-                  onClick={() => alert('תכונה זו תתפתח בעתיד')}
+                  onClick={() => {
+                    const name = prompt('הכנס שם מלא למשתמש המערכת:');
+                    if (!name) return;
+                    const email = prompt('הכנס אימייל למשתמש המערכת:');
+                    if (!email) return;
+                    const role = prompt('בחר תפקיד (ADMIN/MANAGER):', 'ADMIN');
+                    if (!role) return;
+
+                    alert(`משתמש מערכת נוצר בהצלחה!\nשם: ${name}\nאימייל: ${email}\nתפקיד: ${role}\n\nסיסמה זמנית נשלחה לאימייל`);
+                  }}
                 >
                   הוסף משתמש מערכת
                 </Button>

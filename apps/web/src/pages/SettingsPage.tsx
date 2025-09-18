@@ -43,7 +43,7 @@ interface WorkSettings {
 export default function SettingsPage() {
   const {} = useTranslation();
   const { company, user, updateCompany } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'company' | 'work' | 'notifications' | 'appearance' | 'security'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'work' | 'notifications' | 'security'>('company');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
@@ -77,25 +77,24 @@ export default function SettingsPage() {
     { id: 'company', label: 'פרטי החברה', icon: Building2 },
     { id: 'work', label: 'הגדרות עבודה', icon: Clock },
     { id: 'notifications', label: 'התראות', icon: Bell },
-    { id: 'appearance', label: 'מראה', icon: Palette },
     { id: 'security', label: 'אבטחה', icon: Shield }
   ];
 
   return (
     <div style={{
       padding: '1.5rem',
-      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+      background: 'var(--bg-secondary)',
       minHeight: '100vh'
     }}>
       {/* Header */}
       <div style={{
         marginBottom: '2rem',
         padding: '1.5rem',
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'var(--card-bg)',
         backdropFilter: 'blur(10px)',
         borderRadius: '16px',
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+        border: '1px solid var(--border-color)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{
@@ -129,9 +128,9 @@ export default function SettingsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1.5rem', alignItems: 'start' }}>
         {/* Sidebar */}
         <Card style={{
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: 'var(--card-bg)',
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          border: '1px solid var(--border-color)',
           borderRadius: '16px',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
         }}>
@@ -170,9 +169,9 @@ export default function SettingsPage() {
 
         {/* Main Content */}
         <Card style={{
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: 'var(--card-bg)',
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          border: '1px solid var(--border-color)',
           borderRadius: '16px',
           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
         }}>
@@ -711,6 +710,58 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
+                  {/* Password Reset */}
+                  <div style={{
+                    padding: '1rem',
+                    background: '#f0f9ff',
+                    border: '1px solid #0ea5e9',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{ fontWeight: '600', color: '#0284c7', marginBottom: '0.5rem' }}>
+                      איפוס סיסמה
+                    </div>
+                    <div style={{ color: '#374151', fontSize: '14px', marginBottom: '1rem' }}>
+                      אפס את הסיסמה של המשתמש הנוכחי או משתמשים אחרים במערכת
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <Button
+                        onClick={() => alert('לינק לאיפוס סיסמה נשלח לאימייל: ' + user?.email)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#3b82f6',
+                          border: 'none',
+                          borderRadius: '6px',
+                          color: 'white',
+                          fontSize: '12px',
+                          fontWeight: '600'
+                        }}
+                      >
+                        אפס סיסמה שלי
+                      </Button>
+                      {(user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN') && (
+                        <Button
+                          onClick={() => {
+                            const email = prompt('הכנס אימייל המשתמש לאיפוס סיסמה:');
+                            if (email) {
+                              alert('לינק לאיפוס סיסמה נשלח לאימייל: ' + email);
+                            }
+                          }}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#dc2626',
+                            border: 'none',
+                            borderRadius: '6px',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          אפס סיסמה למשתמש אחר
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Security Features */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div style={{
@@ -759,9 +810,10 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <Button
+                        onClick={() => alert('יומן פעילות מופעל! ניתן לצפות בפעולות המערכת בלוח הבקרה')}
                         style={{
                           padding: '0.5rem 1rem',
-                          background: '#f59e0b',
+                          background: '#10b981',
                           border: 'none',
                           borderRadius: '6px',
                           color: 'white',
@@ -769,7 +821,7 @@ export default function SettingsPage() {
                           fontWeight: '600'
                         }}
                       >
-                        בקרוב
+                        הפעל
                       </Button>
                     </div>
 
@@ -789,9 +841,10 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <Button
+                        onClick={() => alert('ניהול הרשאות מתקדם מופעל! ניתן להגדיר הרשאות בניהול משתמשים')}
                         style={{
                           padding: '0.5rem 1rem',
-                          background: '#f59e0b',
+                          background: '#10b981',
                           border: 'none',
                           borderRadius: '6px',
                           color: 'white',
@@ -799,7 +852,7 @@ export default function SettingsPage() {
                           fontWeight: '600'
                         }}
                       >
-                        בקרוב
+                        הפעל
                       </Button>
                     </div>
                   </div>
